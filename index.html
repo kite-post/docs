@@ -240,7 +240,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
   <span class="header-sep" aria-hidden="true"></span>
   <span class="header-title">Документація поштової системи</span>
   <div class="header-meta">
-    <span class="chip">14.11.2026</span>
+    <span class="chip">17.11.2026</span>
     <span class="chip chip-accent">v1.4 · затверджено</span>
   </div>
 </header>
@@ -655,19 +655,19 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td>Своя організація, без фінансів і ключів API</td>
 </tr>
 <tr>
-<td>BRANCH_OPERATOR</td>
+<td>OPERATOR</td>
 <td>Оператор відділення</td>
 <td>Kite Ops + Kite Scan</td>
 <td>Своє відділення</td>
 </tr>
 <tr>
-<td>HUB_SORTER</td>
+<td>SORTER</td>
 <td>Сортувальник</td>
 <td>Kite Ops + Kite Scan</td>
 <td>Свій хаб</td>
 </tr>
 <tr>
-<td>HUB_SUPERVISOR</td>
+<td>SHIFT_MANAGER</td>
 <td>Начальник зміни хабу</td>
 <td>Kite Ops</td>
 <td>Свій хаб, розбіжності, рейси</td>
@@ -698,7 +698,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 </tbody>
 </table></div>
-<p>Окремо існують сервісні акаунти: пристрої Kite Box, стаціонарні сканери-заглушки, симулятор.</p>
+<p>Окремо існують сервісні акаунти: пристрої Kite Box, стаціонарні сканери-заглушки, симулятор. У подіях їхні дії позначаються роллю <code>SYSTEM</code>; ролі персоналу в подіях — це перелік <code>ActorRole</code> із <code>kite-contracts</code>, і імена ролей у Keycloak збігаються з ним.</p>
 <h3 id="s3-2">3.2 Матриця доступів (скорочено)</h3>
 <div class="table-wrap" tabindex="0"><table>
 <thead>
@@ -706,8 +706,8 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <th>Дія</th>
 <th>CLIENT</th>
 <th>BIZ</th>
-<th>BRANCH_OP</th>
-<th>HUB</th>
+<th>OPERATOR</th>
+<th>SORTER, SHIFT_MANAGER</th>
 <th>DRIVER</th>
 <th>SUPPORT</th>
 <th>ADMIN</th>
@@ -940,7 +940,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <tr>
 <td class="id-cell">NFR-06</td>
 <td>Ідемпотентність</td>
-<td>Усі POST, що створюють сутності або платежі, приймають заголовок Idempotency-Key</td>
+<td>Заголовок Idempotency-Key обов'язковий для операцій із грошима, станом відправлення чи комірки (перелік — 9.1); прийом сканів ідемпотентний за <code>scanId</code></td>
 <td>Контрактні тести</td>
 </tr>
 <tr>
@@ -1202,8 +1202,8 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <h3 id="s5-5">5.5 Головний потік: скан у хабі</h3>
 <ol>
 <li>Сортувальник сканує посилку телефоном у режимі Kite Scan; телефон спарений з його сесією в Kite Ops.</li>
-<li>scan-service перевіряє скан (дубль, чи очікувалась посилка в цьому хабі), рахує сортувальну підказку з таблиці маршрутизації і публікує <code>scan.recorded</code>.</li>
-<li>shipment-service застосовує подію до стейт-машини (AT_HUB → SORTED) і публікує <code>shipment.status-changed</code>.</li>
+<li>scan-service перевіряє скан (дубль, чи очікувалась посилка в цьому хабі), рахує сортувальну підказку з таблиці маршрутизації і публікує <code>kite.scan.recorded.v1</code>.</li>
+<li>shipment-service застосовує подію до стейт-машини (AT_HUB → SORTED) і публікує <code>kite.shipment.status-changed.v1</code>.</li>
 <li>tracking-service дописує подію в журнал і оновлює проєкції; ai-service перераховує прогноз.</li>
 <li>realtime-service показує підказку «лінія 7 → Львів» на екрані Kite Ops і на телефоні; клієнт, який дивиться таймлайн, бачить новий крок без оновлення сторінки.</li>
 </ol>
@@ -1220,8 +1220,8 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <tbody>
 <tr>
 <td>kite-contracts</td>
-<td>OpenAPI, JSON Schema подій, генератори клієнтів</td>
-<td>Maven-пакет, Go-модуль, Dart-пакет</td>
+<td>OpenAPI, JSON Schema подій, реєстр подій, генератори клієнтів</td>
+<td>Maven-пакет <code>ua.kite:kite-contracts</code> у GitHub Packages, Go-модуль за тегом, Dart-пакет як git-залежність за тегом (на pub.dev не публікується)</td>
 </tr>
 <tr>
 <td>gateway, customer, business, shipment, pricing, network, logistics, tracking, payment, notification, care, audit (<code>-service</code>)</td>
@@ -1265,12 +1265,17 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 <tr>
 <td>.github</td>
-<td>Спільні reusable-workflow і шаблони репозиторіїв</td>
+<td>Спільні reusable-workflow, кроки збірки образу й оновлення версії в <code>kite-infra</code>, скрипти створення репозиторіїв, стартові пайплайни</td>
 <td>—</td>
+</tr>
+<tr>
+<td>template-java-service, template-go-service, template-python-service, template-vue-app</td>
+<td>Репозиторії-шаблони з прапорцем «Template»: Dockerfile, Makefile, лінтери, CI; <code>make rename</code> перейменовує шаблон у сервіс</td>
+<td>— (з них створюються нові репозиторії)</td>
 </tr>
 </tbody>
 </table></div>
-<p>Разом близько 27 репозиторіїв. Ціна такого поділу — наскрізна зміна, яка торкається кількох із них, тож порядок завжди однаковий: спершу адитивна зміна в <code>kite-contracts</code> з новим тегом, потім споживачі, і тільки потім продюсер починає слати нове поле. Щоб 27 репозиторіїв не розповзлися в різні боки, Dockerfile, лінтери й пайплайни не копіюються руками: нові репозиторії створюються з шаблону, а CI викликає спільні workflow з репозиторію <code>.github</code>.</p>
+<p>Разом 29 робочих репозиторіїв і ще 4 шаблони. Ціна такого поділу — наскрізна зміна, яка торкається кількох із них, тож порядок завжди однаковий: спершу адитивна зміна в <code>kite-contracts</code> з новим тегом, потім споживачі, і тільки потім продюсер починає слати нове поле. Щоб репозиторії не розповзлися в різні боки, Dockerfile, лінтери й пайплайни не копіюються руками: нові репозиторії створюються з шаблону (<code>scripts/new-repo.sh</code> у <code>.github</code>), а CI викликає спільні workflow з репозиторію <code>.github</code>.</p>
 </section>
 <section aria-labelledby="s6" class="doc-sec"><h2 id="s6"><span class="h2-num">06</span><span class="h2-text">Схема бази даних</span></h2>
 <p>Кожен сервіс має власну базу в PostgreSQL 16; разом це близько 60 таблиць. Між базами немає зовнішніх ключів — лише ідентифікатори (UUID), які узгоджуються через події. Міграції кожен сервіс везе у своєму репозиторії й накочує сам; зведений DDL усіх баз лежить у <code>kite-docs</code> як довідка — нижче те саме коротко: що де лежить і головні поля.</p>
@@ -2061,26 +2066,27 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <h3 id="s8-3">8.3 Правила обробки подій</h3>
 <ol>
 <li><strong>Власність даних.</strong> Стан змінює тільки shipment-service, транзакційно разом із записом в outbox. tracking-service лише дописує в журнал і будує проєкції; зворотного запису немає.</li>
-<li><strong>Скан мішка.</strong> Сканується мішок, а не кожна посилка окремо: подія <code>unit.scanned</code> несе список <code>shipment_id</code>, знятий транзакційно в момент скану тим сервісом, який володіє мішком. tracking-service розкладає її віялом в події окремих посилок. Список їде всередині події навмисно — повтор журналу через місяці дасть той самий результат, навіть коли мішок давно розформовано, і tracking-service не мусить ходити по склад мішка в чужу базу.</li>
+<li><strong>Скан мішка.</strong> Сканується мішок, а не кожна посилка окремо: подія <code>kite.scan.unit-scanned.v1</code> несе список <code>shipmentIds</code>, знятий транзакційно в момент скану тим сервісом, який володіє мішком. tracking-service розкладає її віялом в події окремих посилок. Список їде всередині події навмисно — повтор журналу через місяці дасть той самий результат, навіть коли мішок давно розформовано, і tracking-service не мусить ходити по склад мішка в чужу базу.</li>
 <li><strong>Ідемпотентність.</strong> Кожен споживач тримає <code>processed_event(event_id)</code> і пропускає повтори. Розгортання події мішка теж ідемпотентне: ідентифікатор похідної події виводиться з пари «подія мішка + посилка», тож повторна обробка дає ті самі ідентифікатори.</li>
-<li><strong>Час і порядок.</strong> Первинний час — <code>occurred_at</code> (момент скану), тай-брейк — <code>received_at</code> (момент запису). Ключ розділу Kafka — <code>shipment_id</code>, тож порядок у межах відправлення гарантований. Події мішка ключуються мішком, тому похідні події після розгортання перепубліковуються з ключем <code>shipment_id</code>.</li>
+<li><strong>Час і порядок.</strong> Первинний час — <code>occurred_at</code> (момент скану; у конверті CloudEvents це <code>time</code>), тай-брейк — <code>received_at</code> (момент запису; розширення <code>kitereceivedat</code>). Ключ розділу Kafka — <code>shipmentId</code>, тож порядок у межах відправлення гарантований. Події мішка ключуються кодом мішка (<code>unitCode</code>), тому похідні події після розгортання перепубліковуються з ключем <code>shipmentId</code> і посилаються на подію мішка через <code>kitecausationid</code>. Ключ кожного типу записаний у реєстрі подій (9.7).</li>
 <li><strong>Сумнівний час і спізнілі події.</strong> Сканери працюють офлайн, тож їхній годинник може брехати: подія з розходженням <code>occurred_at</code> і <code>received_at</code> понад 24 години йде в карантин і до таймлайну не потрапляє, поки диспетчер її не підтвердить. Подія, що прийшла після кінцевого стану (DELIVERED, CANCELLED, LOST), записується в журнал, стану не змінює і створює інцидент.</li>
 <li><strong>Виправлення.</strong> Нічого не видаляємо. Помилковий скан анулюється подією KT90, яка посилається на <code>event_id</code> скасованої; після цього стан перераховується відтворенням журналу посилки з початку. Подія, перехід якої недозволений із перерахованого стану, відхиляється, позначається недійсною і потрапляє в інцидент — так відпадає ланцюжок сканів, що спирався на помилковий. Право на KT90 має тільки диспетчер: оператор натискає «повідомити про помилку», що створює інцидент, а не змінює журнал. Кожне анулювання пишеться в аудит.</li>
 <li><strong>Сховище журналу.</strong> Postgres бази tracking: <code>tracking_event</code> з партиціями по місяцях та індексом <code>(shipment_id, occurred_at)</code>. Проєкції — окремі таблиці плюс кеш у Redis, перебудовуються з журналу. Окремого аналітичного сховища не заводимо.</li>
-<li><strong>Схеми подій.</strong> CloudEvents у JSON, схеми JSON Schema в репозиторії kite-contracts, з якого генеруються Java-класи, Go-структури і Dart-моделі. Схему можна змінювати лише додаванням необов'язкових полів; зміна змісту наявного поля — це новий тип події з суфіксом версії (<code>kite.shipment.status-changed.v2</code>), а старий живе, доки має споживачів.</li>
+<li><strong>Схеми подій.</strong> CloudEvents у JSON, схеми JSON Schema в репозиторії kite-contracts, з якого генеруються Java-класи, Go-структури і Dart-моделі. Тип події має вигляд <code>kite.&lt;домен&gt;.&lt;подія&gt;.v&lt;N&gt;</code>; відповідність типу, топіка, продюсера, споживачів і ключа розділу лежить у <code>events/registry.json</code>. Схему можна змінювати лише додаванням необов'язкових полів, а схеми не закриваються <code>additionalProperties: false</code>, щоб новий продюсер не ламав старого споживача; зміна змісту наявного поля — це новий тип події з суфіксом версії (<code>kite.shipment.status-changed.v2</code>), а старий живе, доки має споживачів. Тип, який уже є в REST-контракті (наприклад <code>Money</code>), схема події не дублює, а посилається на нього.</li>
 </ol>
 </section>
 <section aria-labelledby="s9" class="doc-sec"><h2 id="s9"><span class="h2-num">09</span><span class="h2-text">API-контракт</span></h2>
 <p>Зовнішній API — REST/JSON за шлюзом під <code>/api/v1</code>, описаний у <code>openapi.yaml</code> репозиторію <code>kite-contracts</code>; між сервісами — події Kafka у форматі CloudEvents; пристрої — MQTT; живі оновлення — WebSocket. Нижче — правила і повна карта ендпоїнтів; схеми тіл запитів і відповідей — у OpenAPI.</p>
+<p>Стан контракту: <code>kite-contracts</code> v0.1.0 описує публічну частину й автентифікацію (9.2), клієнтський кабінет (9.3) і з Kite Ops — лише прийом сканів і сортувальну підказку (9.5); разом 41 шлях і 53 операції. Kite Business (9.4) і решта Kite Ops дописуються в контракт разом із відповідними сервісами. Усі 34 типи подій (9.7) уже описані.</p>
 <h3 id="s9-1">9.1 Загальні правила</h3>
 <ul>
-<li><strong>Автентифікація:</strong> <code>Authorization: Bearer &lt;JWT&gt;</code> для клієнтів і персоналу; <code>X-Api-Key</code> для бізнес-інтеграцій.</li>
-<li><strong>Ідемпотентність:</strong> <code>Idempotency-Key</code> обов'язковий для створення відправлень, платежів і дій з оплатою; повтор з тим самим ключем повертає ту саму відповідь 24 год.</li>
-<li><strong>Помилки:</strong> формат <code>application/problem+json</code> (RFC 9457) з полями <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>code</code> (наприклад <code>SHIPMENT_INVALID_TRANSITION</code>) і <code>errors[]</code> для валідації.</li>
-<li><strong>Пагінація:</strong> курсорна — <code>?limit=20&amp;cursor=…</code>, у відповіді <code>nextCursor</code>.</li>
+<li><strong>Автентифікація:</strong> <code>Authorization: Bearer &lt;JWT&gt;</code> для клієнтів і персоналу; <code>X-Api-Key</code> для бізнес-інтеграцій (схема оголошена в OpenAPI, до операцій підключається разом із Kite Business).</li>
+<li><strong>Ідемпотентність:</strong> <code>Idempotency-Key</code> (UUID) обов'язковий для створення, підтвердження й скасування відправлень, дій керування доставкою, платежів, відкриття комірки, бронювання камери зберігання і претензій; повтор з тим самим ключем повертає ту саму відповідь 24 год. Пакет сканів ідемпотентний за <code>scanId</code> кожного скану.</li>
+<li><strong>Помилки:</strong> формат <code>application/problem+json</code> (RFC 9457) з полями <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code>, <code>code</code> (наприклад <code>SHIPMENT_INVALID_TRANSITION</code>), <code>requestId</code> і <code>errors[]</code> (<code>field</code>, <code>code</code>, <code>message</code>) для валідації.</li>
+<li><strong>Пагінація:</strong> курсорна — <code>?limit=20&amp;cursor=…</code> (<code>limit</code> від 1 до 100, типово 20), у відповіді <code>nextCursor</code>.</li>
 <li><strong>Мова:</strong> <code>Accept-Language: uk</code> або <code>en</code> — від неї залежать людські описи статусів.</li>
 <li><strong>Трасування:</strong> <code>X-Request-Id</code> приймається або генерується шлюзом і проходить через усі сервіси й події.</li>
-<li><strong>Конкурентні зміни:</strong> <code>ETag</code> / <code>If-Match</code> для PATCH відправлень і налаштувань.</li>
+<li><strong>Конкурентні зміни:</strong> <code>ETag</code> / <code>If-Match</code> для PATCH профілю (<code>/me</code>) і відправлень; PATCH всюди має семантику злиття (RFC 7396) — поля, яких немає в тілі, лишаються як були. Налаштування сповіщень замінюються цілком через PUT.</li>
 <li><strong>Вебхуки бізнесу:</strong> заголовок <code>Kite-Signature: t=&lt;час&gt;,v1=&lt;HMAC-SHA256(secret, t.body)&gt;</code>; повтори з експоненційною паузою до 24 год.</li>
 </ul>
 <h3 id="s9-2">9.2 Публічні та автентифікація</h3>
@@ -2422,12 +2428,13 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tbody>
 </table></div>
 <h3 id="s9-7">9.7 Події Kafka</h3>
-<p>Усі події — CloudEvents (<code>id</code>, <code>source</code>, <code>type</code>, <code>time</code>, <code>subject</code>, <code>data</code>), ключ розділу — <code>shipmentId</code>, якщо подія стосується відправлення.</p>
+<p>Усі події — CloudEvents 1.0 у JSON. Обов'язкові поля конверта — <code>specversion</code>, <code>id</code> (UUID), <code>source</code>, <code>type</code>, <code>time</code> і <code>data</code>; необов'язкові — <code>subject</code>, <code>datacontenttype</code>, <code>dataschema</code> і власні розширення <code>kitereceivedat</code> (час запису), <code>kiterequestid</code> (<code>X-Request-Id</code>), <code>kitecausationid</code> (подія-причина) і <code>kitepartitionkey</code>. Тип події — <code>kite.&lt;домен&gt;.&lt;подія&gt;.v1</code>; топік, продюсер, споживачі й ключ розділу кожного типу задані в <code>events/registry.json</code> репозиторію <code>kite-contracts</code>. Для подій відправлення ключ розділу — <code>shipmentId</code>.</p>
 <div class="table-wrap" tabindex="0"><table>
 <thead>
 <tr>
 <th>Топік</th>
 <th>Типи подій</th>
+<th>Ключ розділу</th>
 <th>Продюсер</th>
 <th>Споживачі</th>
 </tr>
@@ -2435,55 +2442,64 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <tbody>
 <tr>
 <td>shipment.events</td>
-<td>created, confirmed, cancelled, status-changed, redirected, recipient-changed, hold-set, return-created</td>
+<td><code>kite.shipment.created.v1</code>, <code>kite.shipment.confirmed.v1</code>, <code>kite.shipment.cancelled.v1</code>, <code>kite.shipment.status-changed.v1</code>, <code>kite.shipment.redirected.v1</code>, <code>kite.shipment.recipient-changed.v1</code>, <code>kite.shipment.hold-set.v1</code>, <code>kite.shipment.return-created.v1</code></td>
+<td><code>shipmentId</code>; return-created — <code>originalShipmentId</code></td>
 <td>shipment-service</td>
 <td>tracking, notification, payment, locker, business (вебхуки), ai, audit</td>
 </tr>
 <tr>
 <td>scan.events</td>
-<td>scan.recorded, unit.scanned, scan.voided</td>
+<td><code>kite.scan.recorded.v1</code>, <code>kite.scan.unit-scanned.v1</code>, <code>kite.scan.voided.v1</code></td>
+<td><code>shipmentId</code>; unit-scanned — <code>unitCode</code></td>
 <td>scan-service</td>
 <td>shipment, logistics, tracking, realtime</td>
 </tr>
 <tr>
 <td>logistics.events</td>
-<td>unit.closed, trip.departed, trip.arrived, discrepancy.opened</td>
+<td><code>kite.logistics.unit-closed.v1</code>, <code>kite.logistics.trip-departed.v1</code>, <code>kite.logistics.trip-arrived.v1</code>, <code>kite.logistics.discrepancy-opened.v1</code></td>
+<td>unit-closed — <code>unitCode</code>; решта — <code>tripId</code></td>
 <td>logistics-service</td>
 <td>shipment, tracking, realtime</td>
 </tr>
 <tr>
 <td>locker.events</td>
-<td>cell.reserved, parcel.deposited, parcel.collected, storage.expired</td>
+<td><code>kite.locker.cell-reserved.v1</code>, <code>kite.locker.parcel-deposited.v1</code>, <code>kite.locker.parcel-collected.v1</code>, <code>kite.locker.storage-expired.v1</code></td>
+<td><code>shipmentId</code></td>
 <td>locker-service</td>
 <td>shipment, tracking, notification</td>
 </tr>
 <tr>
 <td>payment.events</td>
-<td>payment.succeeded, payment.failed, refund.completed, cod.collected, payout.completed</td>
+<td><code>kite.payment.succeeded.v1</code>, <code>kite.payment.failed.v1</code>, <code>kite.payment.refund-completed.v1</code>, <code>kite.payment.cod-collected.v1</code>, <code>kite.payment.payout-completed.v1</code></td>
+<td><code>shipmentId</code>; payout-completed — <code>payoutId</code></td>
 <td>payment-service</td>
 <td>shipment, notification, business</td>
 </tr>
 <tr>
 <td>customer.events</td>
-<td>phone.verified, phone.removed, trusted-person.changed</td>
+<td><code>kite.customer.phone-verified.v1</code>, <code>kite.customer.phone-removed.v1</code>, <code>kite.customer.trusted-person-changed.v1</code></td>
+<td><code>customerId</code></td>
 <td>customer-service</td>
 <td>tracking (індекс «мені»), shipment</td>
 </tr>
 <tr>
 <td>ai.events</td>
-<td>eta.predicted, risk.scored</td>
+<td><code>kite.ai.eta-predicted.v1</code>, <code>kite.ai.risk-scored.v1</code></td>
+<td><code>shipmentId</code></td>
 <td>ai-service</td>
 <td>tracking, notification, shipment</td>
 </tr>
 <tr>
 <td>care.events</td>
-<td>claim.created, claim.resolved, ticket.updated</td>
+<td><code>kite.care.claim-created.v1</code>, <code>kite.care.claim-resolved.v1</code>, <code>kite.care.ticket-updated.v1</code></td>
+<td><code>shipmentId</code>; ticket-updated — <code>ticketId</code></td>
 <td>care-service</td>
 <td>notification, payment (компенсація)</td>
 </tr>
 <tr>
 <td>audit.events</td>
-<td>staff.action, pii.accessed</td>
+<td><code>kite.audit.staff-action.v1</code>, <code>kite.audit.pii-accessed.v1</code></td>
+<td>staff-action — <code>entityId</code>; pii-accessed — <code>subjectId</code></td>
 <td>усі сервіси</td>
 <td>audit-service</td>
 </tr>
@@ -2497,7 +2513,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <li><strong>Номер відправлення:</strong> формат UPU S10 — <code>KT</code> + 8 цифр + контрольна цифра + <code>UA</code>. Контрольна цифра: ваги 8, 6, 4, 2, 3, 5, 9, 7 до восьми цифр, сума за модулем 11; результат = 11 − залишок, де 10 → 0 і 11 → 5.</li>
 <li><strong>Місце:</strong> номер + суфікс <code>-01…-20</code>; на етикетці — Code 128.</li>
 <li><strong>QR клієнта для відправки без етикетки:</strong> підписаний токен <code>kite://ship/{shipmentId}?t=&lt;JWS, 7 днів&gt;</code> — його не підробити, і він не розкриває персональних даних.</li>
-<li><strong>Мішок, контейнер:</strong> <code>BG</code> / <code>CT</code> + 10 цифр; <strong>рейс:</strong> <code>TR-{дата}-{номер}</code>; <strong>комірка:</strong> <code>{код поштомату}-{A01}</code>.</li>
+<li><strong>Мішок, контейнер:</strong> <code>BG</code> / <code>CT</code> + 10 цифр; <strong>рейс:</strong> <code>TR-{ГГГГММДД}-{NNN}</code>; <strong>комірка:</strong> <code>{код поштомату}-{A01}</code>.</li>
 <li>Генерація: ZXing (Java) для етикеток PDF і QR, у Flutter — пакет mobile_scanner для читання.</li>
 </ul>
 <h3 id="s10-2">10.2 Пейринг телефону з Kite Ops</h3>
@@ -2673,7 +2689,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 </tbody>
 </table></div>
-<p>Для Java-сервісів у контейнерах: <code>-XX:MaxRAMPercentage=75</code>, ліміт пам'яті 384 МБ, Spring Boot з AppCDS для швидшого старту. Пізніше можна спробувати збірку GraalVM native для найлегших сервісів.</p>
+<p>Для Java-сервісів у контейнерах: ліміт пам'яті 384 МБ, <code>-XX:MaxRAMPercentage=75 -XX:+UseSerialGC -XX:TieredStopAtLevel=1</code>, віртуальні потоки Spring Boot і шарований jar, щоб нова збірка штовхала в реєстр лише змінені шари. AppCDS у шаблоні поки не ввімкнено: тренувальний запуск піднімає контекст, а справжньому сервісу для цього потрібна база — його вмикають, щойно сервіс навчиться стартувати без неї. Пізніше можна спробувати збірку GraalVM native для найлегших сервісів.</p>
 <h3 id="s12-2">12.2 Порти</h3>
 <div class="table-wrap" tabindex="0"><table>
 <thead>
@@ -2822,11 +2838,19 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 <tr>
 <td>make contracts</td>
-<td>Згенерувати клієнтів з OpenAPI і класи подій з JSON Schema (у репозиторії сервіса)</td>
+<td>Підтягнути <code>kite-contracts</code> за тегом як залежність — моделі, інтерфейси API й класи подій уже згенеровані в пакеті (у репозиторії сервіса)</td>
 </tr>
 <tr>
-<td>make test</td>
-<td>Юніт- і інтеграційні тести (Testcontainers)</td>
+<td>make contracts-check</td>
+<td>Перевірити, що контракти підключені за тегом і копій схем у сервісі немає; CI запускає її, якщо ціль є в <code>Makefile</code></td>
+</tr>
+<tr>
+<td>make test / make test-it</td>
+<td>Юніт-тести / разом з інтеграційними (Testcontainers) — у репозиторії сервіса</td>
+</tr>
+<tr>
+<td>make verify</td>
+<td>Усе, що робить CI: лінт, типи, тести (у репозиторії сервіса)</td>
 </tr>
 <tr>
 <td>make down -v</td>
@@ -2835,12 +2859,12 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tbody>
 </table></div>
 <h3 id="s12-6">12.6 Збірка, образи і версії</h3>
-<p><strong>Пайплайн репозиторію.</strong> У кожного репозиторію свій GitHub Actions: лінт, юніт- і інтеграційні тести (Testcontainers), перевірка на сумісність зі схемами з <code>kite-contracts</code>, збірка образу й публікація в <code>ghcr.io/&lt;організація&gt;/&lt;сервіс&gt;</code>. Пайплайни не копіюються з репозиторію в репозиторій: кожен викликає спільний reusable-workflow із <code>.github</code>, тож правка в одному місці змінює збірку всім.</p>
+<p><strong>Пайплайн репозиторію.</strong> У кожного репозиторію свій GitHub Actions: лінт (Spotless, golangci-lint, ruff, ESLint), перевірка типів (mypy, vue-tsc), перевірка підключення <code>kite-contracts</code> (<code>make contracts-check</code>, якщо ціль є), юніт- і інтеграційні тести (Testcontainers), збірка образу й публікація в <code>ghcr.io/&lt;організація&gt;/&lt;сервіс&gt;</code>. На pull request образ збирається, але не публікується. Пайплайни не копіюються з репозиторію в репозиторій: кожен містить один <code>ci.yml</code>, що викликає спільний reusable-workflow із <code>.github</code> (<code>java-service.yml</code>, <code>go-service.yml</code>, <code>python-service.yml</code>, <code>vue-app.yml</code>), тож правка в одному місці змінює збірку всім.</p>
 <p><strong>Теги образів.</strong> Кожна збірка з <code>main</code> публікує образ із тегом <code>sha-&lt;короткий хеш&gt;</code>; реліз додає <code>v&lt;semver&gt;</code>. Рухомий <code>latest</code> compose не використовує — лише закріплені теги, інакше стенд щоразу піднімається різним.</p>
 <p><strong>Де записані версії.</strong> У <code>kite-infra</code> лежить файл <code>versions.env</code> з тегом кожного образу, а compose підставляє їх як змінні. Цей файл — єдине місце, яке описує, з чого саме складається стенд; його історія в git і є історією складу системи.</p>
-<p><strong>Як версія оновлюється.</strong> Після публікації образу пайплайн сервіса відкриває у <code>kite-infra</code> pull request, який піднімає його рядок у <code>versions.env</code>. Мердж цього PR — і є «деплоєм» на стенд. Вручну те саме робить <code>make bump</code>.</p>
-<p><strong>Локальна розробка.</strong> Сервіс, який правиш, підмінюється файлом <code>docker-compose.override.yml</code>: замість <code>image:</code> у нього <code>build:</code> з шляхом до сусіднього клону (<code>make dev SERVICE=shipment-service</code>). Решта стенду лишається на образах із реєстру, тож локально тримати всі 27 репозиторіїв не треба — досить тих, які зараз правиш.</p>
-<p><strong>Доступ.</strong> Образи й пакети приватні в межах організації; стенд автентифікується в GHCR токеном із правом <code>read:packages</code>, а пайплайни публікують через вбудований <code>GITHUB_TOKEN</code>.</p>
+<p><strong>Як версія оновлюється.</strong> Після публікації образу пайплайн сервіса відкриває у <code>kite-infra</code> pull request, який піднімає його рядок у <code>versions.env</code> (ключ <code>&lt;СЕРВІС&gt;_TAG</code>, наприклад <code>SHIPMENT_SERVICE_TAG</code>). Для цього потрібен секрет організації <code>INFRA_BUMP_TOKEN</code>; без нього крок тихо пропускається. Мердж цього PR — і є «деплоєм» на стенд. Вручну те саме робить <code>make bump</code>.</p>
+<p><strong>Локальна розробка.</strong> Сервіс, який правиш, підмінюється файлом <code>docker-compose.override.yml</code>: замість <code>image:</code> у нього <code>build:</code> з шляхом до сусіднього клону (<code>make dev SERVICE=shipment-service</code>). Решта стенду лишається на образах із реєстру, тож локально тримати всі репозиторії не треба — досить тих, які зараз правиш.</p>
+<p><strong>Доступ.</strong> Репозиторії створюються публічними, а образи в GHCR після першої публікації вручну перемикаються в Public: на плані Free приватні репозиторії мають обмежені хвилини Actions і 500 МБ сховища пакетів, чого вистачає приблизно на два Java-образи. Пайплайни публікують через вбудований <code>GITHUB_TOKEN</code>; ним же Java-збірка читає Maven-пакет <code>kite-contracts</code> із GitHub Packages (у Docker-збірку токен потрапляє секретом BuildKit і в шарах образу не лишається). Закрити репозиторій можна при створенні (<code>VISIBILITY=private</code>), тоді стенду потрібен токен із правом <code>read:packages</code>.</p>
 </section>
 <section aria-labelledby="s13" class="doc-sec"><h2 id="s13"><span class="h2-num">13</span><span class="h2-text">Роадмап</span></h2>
 <p>MVP готовий після фази 4 — орієнтовно через 17 тижнів роботи однієї людини; v2 — ще близько 8 тижнів. Кожна фаза закінчується воротами: наскрізним сценарієм, який має працювати, перш ніж іти далі.</p>
