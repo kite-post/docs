@@ -256,7 +256,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <li class="nav-sec" data-sec="s5"><a href="#s5" class="nav-top"><span class="nav-num">05</span><span>Архітектура і карта сервісів</span></a><ul class="nav-subs"><li><a href="#s5-1" data-sub>Сервіси</a></li><li><a href="#s5-2" data-sub>Клієнтські застосунки</a></li><li><a href="#s5-3" data-sub>Інфраструктура</a></li><li><a href="#s5-4" data-sub>Патерни взаємодії</a></li><li><a href="#s5-5" data-sub>Головний потік: скан у хабі</a></li><li><a href="#s5-6" data-sub>Структура монорепо</a></li></ul></li>
 <li class="nav-sec" data-sec="s6"><a href="#s6" class="nav-top"><span class="nav-num">06</span><span>Схема бази даних</span></a><ul class="nav-subs"><li><a href="#s6-1" data-sub>Домовленості</a></li><li><a href="#s6-2" data-sub>Таблиці по сервісах</a></li><li><a href="#s6-3" data-sub>Ключові індекси та обмеження</a></li></ul></li>
 <li class="nav-sec" data-sec="s7"><a href="#s7" class="nav-top"><span class="nav-num">07</span><span>Стейт-машина посилки</span></a><ul class="nav-subs"><li><a href="#s7-1" data-sub>Стани</a></li><li><a href="#s7-2" data-sub>Переходи</a></li><li><a href="#s7-3" data-sub>Таймери</a></li><li><a href="#s7-4" data-sub>Правила дій клієнта за станом</a></li></ul></li>
-<li class="nav-sec" data-sec="s8"><a href="#s8" class="nav-top"><span class="nav-num">08</span><span>Подієва модель відстеження — для обговорення</span></a><ul class="nav-subs"><li><a href="#s8-1" data-sub>Варіанти</a></li><li><a href="#s8-2" data-sub>Каталог кодів подій (чернетка)</a></li><li><a href="#s8-3" data-sub>Що треба вирішити разом</a></li></ul></li>
+<li class="nav-sec" data-sec="s8"><a href="#s8" class="nav-top"><span class="nav-num">08</span><span>Подієва модель відстеження</span></a><ul class="nav-subs"><li><a href="#s8-1" data-sub>Модель зберігання</a></li><li><a href="#s8-2" data-sub>Каталог кодів подій</a></li><li><a href="#s8-3" data-sub>Правила обробки подій</a></li></ul></li>
 <li class="nav-sec" data-sec="s9"><a href="#s9" class="nav-top"><span class="nav-num">09</span><span>API-контракт</span></a><ul class="nav-subs"><li><a href="#s9-1" data-sub>Загальні правила</a></li><li><a href="#s9-2" data-sub>Публічні та автентифікація</a></li><li><a href="#s9-3" data-sub>Клієнт</a></li><li><a href="#s9-4" data-sub>Kite Business</a></li><li><a href="#s9-5" data-sub>Kite Ops (персонал)</a></li><li><a href="#s9-6" data-sub>Реальний час і пристрої</a></li><li><a href="#s9-7" data-sub>Події Kafka</a></li></ul></li>
 <li class="nav-sec" data-sec="s10"><a href="#s10" class="nav-top"><span class="nav-num">10</span><span>Сканування і заглушки</span></a><ul class="nav-subs"><li><a href="#s10-1" data-sub>Коди</a></li><li><a href="#s10-2" data-sub>Пейринг телефону з Kite Ops</a></li><li><a href="#s10-3" data-sub>Емулятори пристроїв і сервісів</a></li></ul></li>
 <li class="nav-sec" data-sec="s11"><a href="#s11" class="nav-top"><span class="nav-num">11</span><span>AI-фічі</span></a><ul class="nav-subs"><li><a href="#s11-1" data-sub>AI-2: прогноз дати доставки</a></li><li><a href="#s11-2" data-sub>AI-3: ризик невдалого отримання</a></li><li><a href="#s11-3" data-sub>AI-1 і AI-5: vision-конвеєр (v2)</a></li><li><a href="#s11-4" data-sub>AI-6: асистент Kit (v2)</a></li></ul></li>
@@ -1336,11 +1336,6 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td>Хто може отримати конкретне відправлення; хеш коду видачі</td>
 </tr>
 <tr>
-<td>shipment</td>
-<td>status_history</td>
-<td>Локальна історія переходів стейт-машини з посиланням на подію-причину</td>
-</tr>
-<tr>
 <td>pricing</td>
 <td>tariff_version, tariff_rate</td>
 <td>Версії тарифів; ставка за тип × зону × вагову межу</td>
@@ -1871,41 +1866,16 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tbody>
 </table></div>
 </section>
-<section aria-labelledby="s8" class="doc-sec"><h2 id="s8"><span class="h2-num">08</span><span class="h2-text">Подієва модель відстеження — для обговорення</span></h2>
-<p>Рекомендую гібрид (варіант C): shipment-service тримає поточний стан у таблиці, а tracking-service — незмінний журнал подій, з якого будуються всі проєкції. Це чернетка: остаточне рішення приймемо після окремої розмови, питання — в кінці розділу.</p>
-<h3 id="s8-1">8.1 Варіанти</h3>
-<div class="table-wrap" tabindex="0"><table>
-<thead>
-<tr>
-<th>Варіант</th>
-<th>Як працює</th>
-<th>Плюси</th>
-<th>Мінуси</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>A. Стан + журнал</td>
-<td>Статус оновлюється в таблиці, події пишуться окремо як історія</td>
-<td>Найпростіше, зрозуміло будь-кому</td>
-<td>Журнал і стан можуть розійтися; аналітика на «бідних» даних</td>
-</tr>
-<tr>
-<td>B. Повний event sourcing</td>
-<td>Стан відправлення — це згортка всіх його подій (Axon або власна реалізація на Postgres)</td>
-<td>Повна історія, повтор подій, «машина часу»</td>
-<td>Знімки, версіонування подій, складні міграції; багато коду для соло-розробника</td>
-</tr>
-<tr>
-<td>C. Гібрид (рекомендую)</td>
-<td>Стан — у shipment-service, транзакційно разом з outbox; журнал — у tracking-service, незмінний, з нього можна перебудувати будь-яку проєкцію</td>
-<td>Простий запис, повна історія для таймлайну і ML, проєкції перебудовуються</td>
-<td>Два джерела правди для різних питань — треба чітко розділити ролі</td>
-</tr>
-</tbody>
-</table></div>
-<h3 id="s8-2">8.2 Каталог кодів подій (чернетка)</h3>
-<p>Власні коди Kite з відповідністю стандарту UPU EMSEVT там, де вона існує; внутрішні хабові події стандартного аналога не мають.</p>
+<section aria-labelledby="s8" class="doc-sec"><h2 id="s8"><span class="h2-num">08</span><span class="h2-text">Подієва модель відстеження</span></h2>
+<p>Відстеження працює за гібридною моделлю: shipment-service тримає поточний стан відправлення, tracking-service — незмінний журнал подій, з якого будуються всі проєкції читання. Нижче — сама модель, каталог кодів подій і правила обробки.</p>
+<h3 id="s8-1">8.1 Модель зберігання</h3>
+<p><strong>shipment-service — власник стану.</strong> Тільки він виконує переходи стейт-машини розділу 7 і в одній транзакції записує новий стан у <code>shipment</code> та подію в <code>outbox</code>. Публікує outbox окремий процес, тож подія не загубиться і не з'явиться без зміни стану.</p>
+<p><strong>tracking-service — власник історії.</strong> Він споживає події з Kafka і дописує їх у <code>tracking_event</code> — таблицю лише для додавання: записи не оновлюються і не видаляються. З журналу будуються всі проєкції читання (таймлайн, «мені / від мене», публічне відстеження), і будь-яку з них можна перебудувати з нуля, відтворивши журнал.</p>
+<p><strong>Напрямок даних односторонній.</strong> tracking-service ніколи не пише у shipment-service і не змінює стан. Межа проста: shipment-service відповідає на питання «як є зараз», tracking-service — на питання «що сталося». Поточний стан не збирається згорткою подій, а лежить у таблиці разом із <code>version</code> для оптимістичного блокування — повного event sourcing у системі немає.</p>
+<p><strong>Історія одна.</strong> Єдине джерело історії переходів — <code>tracking_event</code>. Окремої таблиці історії в базі shipment немає: <code>outbox</code> — це транспорт, а не архів, і опублікований запис прибирає ретеншен.</p>
+<h3 id="s8-2">8.2 Каталог кодів подій</h3>
+<p>Коди власні. Колонка «У таймлайні» стосується рядка в публічному таймлайні, а не стану: стан клієнт бачить завжди у формулюваннях розділу 7.1, але службові події — сортування, виявлену помилку, анулювання — окремим рядком не показуємо.</p>
+<p>Колонка UPU EMSEVT заповнена лише для чотирьох подій базового набору стандарту; вона потрібна, щоб віддавати статуси зовнішнім агрегаторам відстеження. Kite працює всередині країни, без митниці й обміну між поштами, тож решта кодів EMSEVT застосування не має, а перед реальною інтеграцією цей мапінг треба звірити з чинною редакцією стандарту.</p>
 <div class="table-wrap" tabindex="0"><table>
 <thead>
 <tr>
@@ -1913,7 +1883,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <th>Подія</th>
 <th>Стан після</th>
 <th>UPU EMSEVT</th>
-<th>Видно клієнту</th>
+<th>У таймлайні</th>
 </tr>
 </thead>
 <tbody>
@@ -1928,6 +1898,13 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td class="id-cell">KT02</td>
 <td>Оплачено онлайн</td>
 <td>—</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT03</td>
+<td>Накладну скасовано відправником</td>
+<td>CANCELLED</td>
 <td>—</td>
 <td>Так</td>
 </tr>
@@ -1970,28 +1947,35 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td class="id-cell">KT30</td>
 <td>Прибуло у відділення призначення</td>
 <td>READY_FOR_PICKUP</td>
-<td>EMG, EDH</td>
+<td>EMG</td>
 <td>Так</td>
 </tr>
 <tr>
 <td class="id-cell">KT31</td>
 <td>Покладено в комірку Kite Box</td>
 <td>READY_FOR_PICKUP</td>
-<td>EDH</td>
+<td>—</td>
 <td>Так</td>
 </tr>
 <tr>
 <td class="id-cell">KT32</td>
 <td>Утримується (відпустка, інцидент)</td>
 <td>ON_HOLD</td>
-<td>EDF</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT33</td>
+<td>Утримання завершено</td>
+<td>READY_FOR_PICKUP</td>
+<td>—</td>
 <td>Так</td>
 </tr>
 <tr>
 <td class="id-cell">KT40</td>
 <td>Передано кур'єру</td>
 <td>OUT_FOR_DELIVERY</td>
-<td>EDG</td>
+<td>—</td>
 <td>Так</td>
 </tr>
 <tr>
@@ -1999,6 +1983,13 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td>Невдала спроба доставки</td>
 <td>DELIVERY_FAILED</td>
 <td>EMH</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT42</td>
+<td>Повернуто у відділення після невдалої спроби</td>
+<td>READY_FOR_PICKUP</td>
+<td>—</td>
 <td>Так</td>
 </tr>
 <tr>
@@ -2010,7 +2001,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 <tr>
 <td class="id-cell">KT60</td>
-<td>Переадресовано</td>
+<td>Переадресовано до прибуття</td>
 <td>—</td>
 <td>—</td>
 <td>Так</td>
@@ -2023,18 +2014,53 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td>Так</td>
 </tr>
 <tr>
+<td class="id-cell">KT62</td>
+<td>Переадресовано після прибуття (платно)</td>
+<td>IN_TRANSIT</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT63</td>
+<td>Відправлено з поштомата у відділення (вичерпано строк)</td>
+<td>IN_TRANSIT</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
 <td class="id-cell">KT70</td>
-<td>Створено повернення</td>
+<td>Повернення: відмова отримувача</td>
+<td>RETURNED</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT71</td>
+<td>Повернення: вичерпано строк зберігання</td>
 <td>RETURNED</td>
 <td>—</td>
 <td>Так</td>
 </tr>
 <tr>
 <td class="id-cell">KT80</td>
-<td>Підозра на втрату / втрачено / знайдено</td>
-<td>LOST, AT_HUB</td>
+<td>Підозра на втрату (немає сканів понад норматив)</td>
+<td>—</td>
+<td>—</td>
+<td>Ні</td>
+</tr>
+<tr>
+<td class="id-cell">KT81</td>
+<td>Втрату підтверджено диспетчером</td>
+<td>LOST</td>
 <td>—</td>
 <td>Так (м'яко)</td>
+</tr>
+<tr>
+<td class="id-cell">KT82</td>
+<td>Посилку знайдено</td>
+<td>AT_HUB</td>
+<td>—</td>
+<td>Так</td>
 </tr>
 <tr>
 <td class="id-cell">KT90</td>
@@ -2045,14 +2071,17 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 </tbody>
 </table></div>
-<h3 id="s8-3">8.3 Що треба вирішити разом</h3>
+<p>Кожен перехід T1–T19 розділу 7.2 має свій код. Події з прочерком у колонці стану стану не змінюють: це оплата, службові позначки й дії, після яких посилка лишається там, де була.</p>
+<h3 id="s8-3">8.3 Правила обробки подій</h3>
 <ol>
-<li><strong>Варіант зберігання:</strong> A, B чи C — і чи хочеш спробувати event sourcing як навчальну мету (тоді B лише для shipment-service).</li>
-<li><strong>Гранулярність:</strong> скан мішка — це одна подія мішка чи розгортання в події для кожної посилки всередині? Пропоную: одна подія <code>unit.scanned</code> у Kafka, а tracking-service розгортає її в події посилок.</li>
-<li><strong>Пізні й невпорядковані події:</strong> сортуємо за <code>occurred_at</code> (час скану), а не за часом отримання; ключ розділу Kafka — <code>shipment_id</code>, тож порядок у межах відправлення гарантований.</li>
-<li><strong>Виправлення:</strong> нічого не видаляємо — помилковий скан анулюється подією KT90, проєкції перераховуються.</li>
-<li><strong>Сховище журналу:</strong> Postgres з партиціями по місяцях (просто), TimescaleDB (те саме + зручні агрегати) чи ClickHouse для аналітики (ще один контейнер).</li>
-<li><strong>Схеми подій:</strong> JSON Schema (просто, легко читати) чи Avro + реєстр схем Apicurio (суворе версіонування).</li>
+<li><strong>Власність даних.</strong> Стан змінює тільки shipment-service, транзакційно разом із записом в outbox. tracking-service лише дописує в журнал і будує проєкції; зворотного запису немає.</li>
+<li><strong>Скан мішка.</strong> Сканується мішок, а не кожна посилка окремо: подія <code>unit.scanned</code> несе список <code>shipment_id</code>, знятий транзакційно в момент скану тим сервісом, який володіє мішком. tracking-service розкладає її віялом в події окремих посилок. Список їде всередині події навмисно — повтор журналу через місяці дасть той самий результат, навіть коли мішок давно розформовано, і tracking-service не мусить ходити по склад мішка в чужу базу.</li>
+<li><strong>Ідемпотентність.</strong> Кожен споживач тримає <code>processed_event(event_id)</code> і пропускає повтори. Розгортання події мішка теж ідемпотентне: ідентифікатор похідної події виводиться з пари «подія мішка + посилка», тож повторна обробка дає ті самі ідентифікатори.</li>
+<li><strong>Час і порядок.</strong> Первинний час — <code>occurred_at</code> (момент скану), тай-брейк — <code>received_at</code> (момент запису). Ключ розділу Kafka — <code>shipment_id</code>, тож порядок у межах відправлення гарантований. Події мішка ключуються мішком, тому похідні події після розгортання перепубліковуються з ключем <code>shipment_id</code>.</li>
+<li><strong>Сумнівний час і спізнілі події.</strong> Сканери працюють офлайн, тож їхній годинник може брехати: подія з розходженням <code>occurred_at</code> і <code>received_at</code> понад 24 години йде в карантин і до таймлайну не потрапляє, поки диспетчер її не підтвердить. Подія, що прийшла після кінцевого стану (DELIVERED, CANCELLED, LOST), записується в журнал, стану не змінює і створює інцидент.</li>
+<li><strong>Виправлення.</strong> Нічого не видаляємо. Помилковий скан анулюється подією KT90, яка посилається на <code>event_id</code> скасованої; після цього стан перераховується відтворенням журналу посилки з початку. Подія, перехід якої недозволений із перерахованого стану, відхиляється, позначається недійсною і потрапляє в інцидент — так відпадає ланцюжок сканів, що спирався на помилковий. Право на KT90 має тільки диспетчер: оператор натискає «повідомити про помилку», що створює інцидент, а не змінює журнал. Кожне анулювання пишеться в аудит.</li>
+<li><strong>Сховище журналу.</strong> Postgres бази tracking: <code>tracking_event</code> з партиціями по місяцях та індексом <code>(shipment_id, occurred_at)</code>. Проєкції — окремі таблиці плюс кеш у Redis, перебудовуються з журналу. Окремого аналітичного сховища не заводимо.</li>
+<li><strong>Схеми подій.</strong> CloudEvents у JSON, схеми JSON Schema в репозиторії kite-contracts, з якого генеруються Java-класи, Go-структури і Dart-моделі. Схему можна змінювати лише додаванням необов'язкових полів; зміна змісту наявного поля — це новий тип події з суфіксом версії (<code>kite.shipment.status-changed.v2</code>), а старий живе, доки має споживачів.</li>
 </ol>
 </section>
 <section aria-labelledby="s9" class="doc-sec"><h2 id="s9"><span class="h2-num">09</span><span class="h2-text">API-контракт</span></h2>
@@ -2922,7 +2951,6 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </table></div>
 <h3 id="s14-2">14.2 Відкриті питання</h3>
 <ol>
-<li><strong>Подієва модель</strong> — варіант A, B чи C і решта питань з розділу 8; домовились обговорити окремо.</li>
 <li><strong>A8 «відправка без етикетки»</strong> — у відповідях пропущено; я заклав її в MVP, бо QR-код і так лежить в основі сканування. Підтверди або прибери.</li>
 <li><strong>AI-6 і AI-8</strong> — ти написав «усе, крім 4 і 7»; я поставив асистента Kit у v2, а маршрут кур'єра — у v3, бо застосунок кур'єра (F6) не робимо. Ок?</li>
 <li><strong>Доставка на адресу</strong> — без застосунку кур'єра я залишив мінімальну роль COURIER у Kite Scan (список завдань, «видано / не вдалося»). Залишаємо так чи прибираємо адресну доставку взагалі?</li>
