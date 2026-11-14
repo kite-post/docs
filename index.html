@@ -1,0 +1,3001 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Документація Kite</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky brand header; left rail with the 14 numbered sections (scroll-spy); one reading column with tables and diagrams. Single dark theme in Kite brand colors. */
+:root {
+  color-scheme: dark;
+  --bg: #0b1220;          /* kite night */
+  --surface: #111a2c;     /* rails, code, tables */
+  --raise: #17233a;       /* hover, chips */
+  --line: #233150;        /* hairlines */
+  --ink: #e9eef6;
+  --muted: #95a3bb;
+  --faint: #66748f;
+  --coral: #ff5a36;       /* brand accent */
+  --coral-soft: rgba(255, 90, 54, 0.14);
+  --sky: #86a8ff;         /* links, info */
+  --f-display: "Unbounded", "Manrope", system-ui, sans-serif;
+  --f-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --header-h: 60px;
+  --rail-w: 288px;
+  /* diagram tokens */
+  --d-edge: #5c6c88;
+  --d-accent: #ff5a36;
+  --d-ink: #e9eef6;
+  --d-quiet: #95a3bb;
+  --d-tint: #1a2742;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 30; background: var(--bg);
+}
+a { color: var(--sky); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; border-radius: 4px; }
+
+/* ---------- header ---------- */
+.site-header {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  height: var(--header-h);
+  display: flex; align-items: center; gap: 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: rgba(11, 18, 32, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+.brand:hover { text-decoration: none; }
+.logo-mark { width: 30px; height: 34px; flex: none; }
+.wordmark { font-family: var(--f-display); font-weight: 700; font-size: 20px; letter-spacing: 0.01em; }
+.header-sep { width: 1px; height: 22px; background: var(--line); }
+.header-title { color: var(--muted); font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.header-meta { margin-left: auto; display: flex; align-items: center; gap: 8px; flex: none; }
+.chip {
+  font-family: var(--f-mono); font-size: 12px; color: var(--muted);
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px; white-space: nowrap;
+}
+.chip-accent { color: var(--coral); border-color: rgba(255, 90, 54, 0.4); background: var(--coral-soft); }
+.menu-btn {
+  display: none; align-items: center; gap: 8px;
+  background: var(--raise); color: var(--ink); border: 1px solid var(--line);
+  font: 600 13px var(--f-body); padding: 7px 12px; border-radius: 8px; cursor: pointer;
+}
+.menu-btn svg { width: 16px; height: 16px; }
+
+/* ---------- shell ---------- */
+.shell { display: grid; grid-template-columns: var(--rail-w) minmax(0, 1fr); }
+.rail {
+  position: sticky; top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  height: calc(100dvh - var(--header-h) - env(safe-area-inset-top, 0px));
+  overflow-y: auto; overscroll-behavior: contain;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  padding-block: 20px 32px;
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: 12px;
+}
+.rail-label {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--faint); padding: 0 10px 10px;
+}
+.rail ul { list-style: none; margin: 0; padding: 0; }
+.nav-top {
+  display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: baseline;
+  padding: 7px 10px; border-radius: 8px; color: var(--muted);
+  font-size: 14px; font-weight: 600; line-height: 1.35;
+}
+.nav-top:hover { background: var(--raise); color: var(--ink); text-decoration: none; }
+.nav-num { font-family: var(--f-mono); font-size: 12px; color: var(--faint); font-weight: 500; }
+.nav-sec.is-active > .nav-top { background: var(--coral-soft); color: var(--ink); }
+.nav-sec.is-active > .nav-top .nav-num { color: var(--coral); }
+.nav-subs { display: none; margin: 2px 0 6px 36px !important; border-left: 1px solid var(--line); }
+.nav-sec.is-active .nav-subs { display: block; }
+.nav-subs a {
+  display: block; padding: 4px 10px; font-size: 13px; color: var(--muted); line-height: 1.4;
+  margin-left: -1px; border-left: 2px solid transparent;
+}
+.nav-subs a:hover { color: var(--ink); text-decoration: none; }
+.nav-subs a.is-active { color: var(--ink); border-left-color: var(--coral); }
+
+/* ---------- content ---------- */
+.content {
+  min-width: 0;
+  padding-block: 40px 96px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.content-inner { max-width: 900px; margin: 0 auto; }
+
+.intro { padding-bottom: 36px; margin-bottom: 8px; border-bottom: 1px solid var(--line); }
+.eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--coral);
+}
+.intro h1 {
+  font-family: var(--f-display); font-weight: 700; font-size: clamp(28px, 4.4vw, 44px);
+  line-height: 1.12; margin: 12px 0 14px; text-wrap: balance; letter-spacing: -0.01em;
+}
+.intro .lead { color: var(--muted); font-size: 17px; max-width: 64ch; margin: 0; }
+.facts {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px;
+  margin: 28px 0 0; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+}
+.facts div { background: var(--surface); padding: 14px 16px; }
+.facts dt { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); }
+.facts dd { margin: 4px 0 0; font-family: var(--f-display); font-weight: 500; font-size: 17px; font-variant-numeric: tabular-nums; }
+.facts dd small { font-family: var(--f-body); font-size: 13px; color: var(--muted); font-weight: 500; }
+
+.doc-sec { padding-top: 48px; }
+.doc-sec h2 {
+  display: flex; align-items: baseline; gap: 14px;
+  font-family: var(--f-display); font-weight: 500; font-size: clamp(22px, 2.8vw, 28px);
+  line-height: 1.25; margin: 0 0 18px; text-wrap: balance;
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+.h2-num { font-family: var(--f-mono); font-size: 0.6em; font-weight: 500; color: var(--coral); flex: none; transform: translateY(-0.15em); }
+.doc-sec h3 {
+  font-size: 18px; font-weight: 700; margin: 36px 0 12px; line-height: 1.35; text-wrap: balance;
+  scroll-margin-top: calc(var(--header-h) + 24px);
+}
+.doc-sec p, .doc-sec li { max-width: 72ch; }
+.doc-sec p { margin: 0 0 14px; }
+.doc-sec > p:first-of-type { font-size: 17px; color: var(--ink); }
+.doc-sec ul, .doc-sec ol { padding-left: 22px; margin: 0 0 16px; }
+.doc-sec li { margin: 6px 0; }
+.doc-sec li::marker { color: var(--faint); }
+.doc-sec ol > li::marker { font-family: var(--f-mono); font-size: 13px; color: var(--coral); }
+strong { color: var(--ink); font-weight: 700; }
+strong.req {
+  font-family: var(--f-mono); font-size: 12.5px; font-weight: 500; color: var(--coral);
+  background: var(--coral-soft); padding: 1px 7px; border-radius: 5px; margin-right: 2px; white-space: nowrap;
+}
+code {
+  font-family: var(--f-mono); font-size: 0.86em; background: var(--raise); color: #cfe0ff;
+  padding: 1px 6px; border-radius: 5px; border: 1px solid var(--line); overflow-wrap: anywhere;
+}
+pre {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px 18px; overflow-x: auto; margin: 0 0 18px; line-height: 1.55;
+}
+pre code { background: none; border: 0; padding: 0; color: var(--ink); font-size: 13px; overflow-wrap: normal; }
+
+.table-wrap {
+  overflow-x: auto; margin: 0 0 20px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface);
+}
+table { border-collapse: collapse; width: 100%; font-size: 14px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+th {
+  text-align: left; font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--faint); padding: 10px 14px; border-bottom: 1px solid var(--line); white-space: nowrap;
+  background: #0f1828;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top; color: #d5dce8; min-width: 110px; }
+tr:last-child td { border-bottom: 0; }
+tbody tr:hover td { background: rgba(134, 168, 255, 0.05); }
+td:first-child { color: var(--ink); font-weight: 600; }
+td.id-cell { font-family: var(--f-mono); font-size: 13px; font-weight: 500; color: var(--coral); white-space: nowrap; min-width: 0; }
+
+.dia-wrap { margin: 8px 0 24px; }
+.dia-scroll {
+  overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px;
+}
+svg.dia { display: block; width: 100%; min-width: 640px; height: auto; }
+figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family: var(--f-mono); }
+
+.page-foot { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--faint); font-size: 13px; }
+
+/* ---------- narrow ---------- */
+.scrim { display: none; }
+@media (max-width: 980px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-flex; }
+  .header-sep, .header-title { display: none; }
+  .rail {
+    position: fixed; z-index: 25; left: 0;
+    top: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+    width: min(86vw, 320px); height: calc(100dvh - var(--header-h) - env(safe-area-inset-top, 0px));
+    padding-bottom: calc(32px + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-102%); transition: transform 0.22s ease;
+    box-shadow: 0 0 0 1px var(--line), 18px 0 40px rgba(0, 0, 0, 0.45);
+  }
+  body.nav-open .rail { transform: none; }
+  body.nav-open .scrim {
+    display: block; position: fixed; inset: 0; z-index: 24; background: rgba(4, 8, 16, 0.55);
+  }
+}
+@media (max-width: 560px) {
+  .header-meta .chip:not(.chip-accent) { display: none; }
+  .wordmark { font-size: 18px; }
+  .content { padding-block: 28px 72px; }
+}
+@media (prefers-reduced-motion: reduce) { .rail { transition: none; } }
+</style>
+
+<header class="site-header">
+  <button class="menu-btn" id="menu-btn" type="button" aria-controls="rail" aria-expanded="false">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h8"/></svg>
+    Зміст
+  </button>
+  <a class="brand" href="#top" aria-label="Kite — на початок">
+    <svg class="logo-mark" viewBox="0 0 30 34" aria-hidden="true">
+      <path d="M15 1 L26 12.5 L15 24 L4 12.5 Z" fill="#ff5a36"/>
+      <path d="M15 1 V24 M4 12.5 H26" stroke="#0b1220" stroke-width="1.3" opacity="0.55"/>
+      <path d="M15 24 C 14 27.5, 10.5 28.5, 8 32" stroke="#95a3bb" stroke-width="1.2" fill="none" stroke-dasharray="1.5 2.5" stroke-linecap="round"/>
+      <circle cx="14.2" cy="26.6" r="1.6" fill="#e9eef6"/>
+      <circle cx="11" cy="29.4" r="1.6" fill="#e9eef6"/>
+      <circle cx="8" cy="32" r="1.6" fill="#ff5a36"/>
+    </svg>
+    <span class="wordmark">Kite</span>
+  </a>
+  <span class="header-sep" aria-hidden="true"></span>
+  <span class="header-title">Документація поштової системи</span>
+  <div class="header-meta">
+    <span class="chip">11.11.2026</span>
+    <span class="chip chip-accent">v1.0 · чернетка</span>
+  </div>
+</header>
+
+<div class="shell" id="top">
+  <nav class="rail" id="rail" aria-label="Розділи документації">
+    <div class="rail-label">Розділи</div>
+    <ul>
+<li class="nav-sec" data-sec="s1"><a href="#s1" class="nav-top"><span class="nav-num">01</span><span>Огляд продукту і бренд</span></a><ul class="nav-subs"><li><a href="#s1-1" data-sub>Обсяг</a></li><li><a href="#s1-2" data-sub>Продуктова лінійка</a></li><li><a href="#s1-3" data-sub>Бренд</a></li></ul></li>
+<li class="nav-sec" data-sec="s2"><a href="#s2" class="nav-top"><span class="nav-num">02</span><span>Бізнес-модель</span></a><ul class="nav-subs"><li><a href="#s2-1" data-sub>Сегменти клієнтів</a></li><li><a href="#s2-2" data-sub>Ціннісна пропозиція</a></li><li><a href="#s2-3" data-sub>Джерела доходу</a></li><li><a href="#s2-4" data-sub>Тарифна сітка (модель)</a></li><li><a href="#s2-5" data-sub>Плани Kite Business</a></li><li><a href="#s2-6" data-sub>Лояльність (Kite Бали)</a></li><li><a href="#s2-7" data-sub>Бізнес-модель на одній сторінці</a></li><li><a href="#s2-8" data-sub>Юніт-економіка посилки (модель)</a></li></ul></li>
+<li class="nav-sec" data-sec="s3"><a href="#s3" class="nav-top"><span class="nav-num">03</span><span>Технічне завдання: ролі та функціональні вимоги</span></a><ul class="nav-subs"><li><a href="#s3-1" data-sub>Ролі</a></li><li><a href="#s3-2" data-sub>Матриця доступів (скорочено)</a></li><li><a href="#s3-3" data-sub>Акаунт і профіль</a></li><li><a href="#s3-4" data-sub>Створення відправлення</a></li><li><a href="#s3-5" data-sub>Мережа і точки</a></li><li><a href="#s3-6" data-sub>Kite Box</a></li><li><a href="#s3-7" data-sub>Відстеження</a></li><li><a href="#s3-8" data-sub>Сповіщення</a></li><li><a href="#s3-9" data-sub>Керування доставкою</a></li><li><a href="#s3-10" data-sub>Повернення і претензії</a></li><li><a href="#s3-11" data-sub>Оплата і бали</a></li><li><a href="#s3-12" data-sub>Kite Business</a></li><li><a href="#s3-13" data-sub>Kite Ops (персонал)</a></li><li><a href="#s3-14" data-sub>Підтримка</a></li></ul></li>
+<li class="nav-sec" data-sec="s4"><a href="#s4" class="nav-top"><span class="nav-num">04</span><span>Нефункціональні вимоги</span></a></li>
+<li class="nav-sec" data-sec="s5"><a href="#s5" class="nav-top"><span class="nav-num">05</span><span>Архітектура і карта сервісів</span></a><ul class="nav-subs"><li><a href="#s5-1" data-sub>Сервіси</a></li><li><a href="#s5-2" data-sub>Клієнтські застосунки</a></li><li><a href="#s5-3" data-sub>Інфраструктура</a></li><li><a href="#s5-4" data-sub>Патерни взаємодії</a></li><li><a href="#s5-5" data-sub>Головний потік: скан у хабі</a></li><li><a href="#s5-6" data-sub>Структура монорепо</a></li></ul></li>
+<li class="nav-sec" data-sec="s6"><a href="#s6" class="nav-top"><span class="nav-num">06</span><span>Схема бази даних</span></a><ul class="nav-subs"><li><a href="#s6-1" data-sub>Домовленості</a></li><li><a href="#s6-2" data-sub>Таблиці по сервісах</a></li><li><a href="#s6-3" data-sub>Ключові індекси та обмеження</a></li></ul></li>
+<li class="nav-sec" data-sec="s7"><a href="#s7" class="nav-top"><span class="nav-num">07</span><span>Стейт-машина посилки</span></a><ul class="nav-subs"><li><a href="#s7-1" data-sub>Стани</a></li><li><a href="#s7-2" data-sub>Переходи</a></li><li><a href="#s7-3" data-sub>Таймери</a></li><li><a href="#s7-4" data-sub>Правила дій клієнта за станом</a></li></ul></li>
+<li class="nav-sec" data-sec="s8"><a href="#s8" class="nav-top"><span class="nav-num">08</span><span>Подієва модель відстеження — для обговорення</span></a><ul class="nav-subs"><li><a href="#s8-1" data-sub>Варіанти</a></li><li><a href="#s8-2" data-sub>Каталог кодів подій (чернетка)</a></li><li><a href="#s8-3" data-sub>Що треба вирішити разом</a></li></ul></li>
+<li class="nav-sec" data-sec="s9"><a href="#s9" class="nav-top"><span class="nav-num">09</span><span>API-контракт</span></a><ul class="nav-subs"><li><a href="#s9-1" data-sub>Загальні правила</a></li><li><a href="#s9-2" data-sub>Публічні та автентифікація</a></li><li><a href="#s9-3" data-sub>Клієнт</a></li><li><a href="#s9-4" data-sub>Kite Business</a></li><li><a href="#s9-5" data-sub>Kite Ops (персонал)</a></li><li><a href="#s9-6" data-sub>Реальний час і пристрої</a></li><li><a href="#s9-7" data-sub>Події Kafka</a></li></ul></li>
+<li class="nav-sec" data-sec="s10"><a href="#s10" class="nav-top"><span class="nav-num">10</span><span>Сканування і заглушки</span></a><ul class="nav-subs"><li><a href="#s10-1" data-sub>Коди</a></li><li><a href="#s10-2" data-sub>Пейринг телефону з Kite Ops</a></li><li><a href="#s10-3" data-sub>Емулятори пристроїв і сервісів</a></li></ul></li>
+<li class="nav-sec" data-sec="s11"><a href="#s11" class="nav-top"><span class="nav-num">11</span><span>AI-фічі</span></a><ul class="nav-subs"><li><a href="#s11-1" data-sub>AI-2: прогноз дати доставки</a></li><li><a href="#s11-2" data-sub>AI-3: ризик невдалого отримання</a></li><li><a href="#s11-3" data-sub>AI-1 і AI-5: vision-конвеєр (v2)</a></li><li><a href="#s11-4" data-sub>AI-6: асистент Kit (v2)</a></li></ul></li>
+<li class="nav-sec" data-sec="s12"><a href="#s12" class="nav-top"><span class="nav-num">12</span><span>Інфраструктура і локальний деплой</span></a><ul class="nav-subs"><li><a href="#s12-1" data-sub>Профілі</a></li><li><a href="#s12-2" data-sub>Порти</a></li><li><a href="#s12-3" data-sub>Порядок старту і готовність</a></li><li><a href="#s12-4" data-sub>Сид-дані</a></li><li><a href="#s12-5" data-sub>Команди розробника</a></li></ul></li>
+<li class="nav-sec" data-sec="s13"><a href="#s13" class="nav-top"><span class="nav-num">13</span><span>Роадмап</span></a></li>
+<li class="nav-sec" data-sec="s14"><a href="#s14" class="nav-top"><span class="nav-num">14</span><span>Глосарій і відкриті питання</span></a><ul class="nav-subs"><li><a href="#s14-1" data-sub>Глосарій</a></li><li><a href="#s14-2" data-sub>Відкриті питання</a></li></ul></li>
+    </ul>
+  </nav>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="content">
+    <div class="content-inner">
+      <div class="intro">
+        <div class="eyebrow">Технічна документація · Україна</div>
+        <h1>Kite — доставка, що летить</h1>
+        <p class="lead">Поштова система від створення накладної до видачі: відділення, хаби, поштомати Kite Box, застосунок і веб для клієнтів, кабінет для бізнесу та робочі місця персоналу з телефоном-сканером.</p>
+        <dl class="facts">
+          <div><dt>Сервіси</dt><dd>18 <small>+ симулятор</small></dd></div>
+          <div><dt>Стек</dt><dd>Java <small>· Go · Python</small></dd></div>
+          <div><dt>Клієнти</dt><dd>Vue <small>· Flutter</small></dd></div>
+          <div><dt>API</dt><dd>117 <small>операцій</small></dd></div>
+          <div><dt>MVP</dt><dd>~17 <small>тижнів</small></dd></div>
+        </dl>
+      </div>
+<section aria-labelledby="s1" class="doc-sec"><h2 id="s1"><span class="h2-num">01</span><span class="h2-text">Огляд продукту і бренд</span></h2>
+<p>Kite — вигаданий національний оператор експрес-доставки по Україні. Система покриває весь шлях посилки: створення накладної, прийом, сортування в хабах, магістраль, видачу у відділенні чи поштоматі Kite Box і повернення. Клієнти працюють через застосунок (Flutter) і веб (Vue), бізнес — через окремий кабінет Kite Business, персонал — через веб-панель Kite Ops і телефон-сканер Kite Scan.</p>
+<h3 id="s1-1">Обсяг</h3>
+<ul>
+<li><strong>Географія:</strong> тільки Україна, реальні міста й адреси (дані OpenStreetMap), вигадана мережа відділень, хабів і поштоматів.</li>
+<li><strong>Типи відправлень:</strong> документи (до 1 кг), посилка (до 30 кг на місце), вантаж (понад 30 кг, до 500 кг на місце).</li>
+<li><strong>Сид-мережа для демо:</strong> 5 магістральних хабів (Київ, Львів, Дніпро, Одеса, Харків), 24 обласні сортувальні центри, близько 400 відділень і 1200 поштоматів Kite Box. Цифри — припущення для сид-даних, їх легко змінити.</li>
+<li><strong>Поза обсягом:</strong> міжнародна доставка і мито, кур'єрський забір посилки, окремий застосунок кур'єра, PUDO-точки, мобільні відділення, офлайн-режим, фото-підтвердження і підпис при доставці, «кур'єр поруч».</li>
+</ul>
+<h3 id="s1-2">Продуктова лінійка</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Продукт</th>
+<th>Для кого</th>
+<th>Платформа</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Kite (застосунок)</td>
+<td>Відправники та отримувачі</td>
+<td>Flutter, iOS і Android</td>
+</tr>
+<tr>
+<td>kite.ua</td>
+<td>Відправники та отримувачі</td>
+<td>Vue, веб</td>
+</tr>
+<tr>
+<td>Публічне відстеження</td>
+<td>Будь-хто з номером</td>
+<td>Сторінка kite.ua/track без логіну</td>
+</tr>
+<tr>
+<td>Kite Business</td>
+<td>Інтернет-магазини, компанії</td>
+<td>Vue, окремий кабінет + REST API і вебхуки</td>
+</tr>
+<tr>
+<td>Kite Ops</td>
+<td>Оператори, сортувальники, диспетчери, адміни</td>
+<td>Vue, веб-панель</td>
+</tr>
+<tr>
+<td>Kite Scan</td>
+<td>Персонал</td>
+<td>Режим сканера у Flutter-застосунку, спарений з Kite Ops</td>
+</tr>
+<tr>
+<td>Kite Box</td>
+<td>Поштомат</td>
+<td>Емулятор пристрою + екран поштомату у вебі</td>
+</tr>
+<tr>
+<td>Kit</td>
+<td>AI-асистент</td>
+<td>У застосунку та вебі (v2)</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s1-3">Бренд</h3>
+<p>Kite — це і повітряний змій, і шуліка: легкість, швидкість і погляд згори, з якого видно весь маршрут. Слоган українською — «Доставка, що летить», англійською — «Sent. Flying. Delivered.»</p>
+<p><strong>Логотип.</strong> Ромб повітряного змія, від якого тягнеться хвіст-маршрут із трьох точок: відділення → хаб → відділення. Іконка застосунку — лише ромб на кораловому фоні. Хвіст-пунктир повторюється в інтерфейсі як лінія маршруту в таймлайні відстеження.</p>
+<p><strong>Кольори (світла тема).</strong></p>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Токен</th>
+<th>HEX</th>
+<th>Де використовується</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kite-coral</td>
+<td>#FF5A36</td>
+<td>Головні кнопки, акценти, логотип</td>
+</tr>
+<tr>
+<td>kite-ink</td>
+<td>#0E1A2B</td>
+<td>Основний текст, темні поверхні</td>
+</tr>
+<tr>
+<td>kite-sky</td>
+<td>#2E6BFF</td>
+<td>Посилання, інформаційні статуси, маршрут на карті</td>
+</tr>
+<tr>
+<td>kite-paper</td>
+<td>#F7F4EE</td>
+<td>Фон сторінок</td>
+</tr>
+<tr>
+<td>kite-mist</td>
+<td>#E6E9EF</td>
+<td>Рамки, роздільники</td>
+</tr>
+<tr>
+<td>success</td>
+<td>#1F9D6B</td>
+<td>Доставлено, оплачено</td>
+</tr>
+<tr>
+<td>warning</td>
+<td>#F2A93B</td>
+<td>Затримка, очікує дії</td>
+</tr>
+<tr>
+<td>danger</td>
+<td>#E5484D</td>
+<td>Помилка, втрата, пошкодження</td>
+</tr>
+</tbody>
+</table></div>
+<p>Темна тема: фон #0B1220, поверхні #142033, текст #EEF2F7; коралова лишається акцентом в обох темах.</p>
+<p><strong>Типографіка.</strong> Заголовки — Unbounded, текст і інтерфейс — Manrope, номери накладних і коди — JetBrains Mono. Усі три шрифти безкоштовні й підтримують кирилицю. Шкала розмірів: 12 / 14 / 16 / 20 / 24 / 32 / 40.</p>
+<p><strong>Форма і ритм.</strong> Сітка 4 pt, радіус 12 для карток і 8 для полів, кнопки-«таблетки». Іконки — Lucide, контурні, товщина 1,5.</p>
+<p><strong>Голос.</strong> Коротко, на «ви», без канцеляриту. Статуси пишемо людською мовою: «Посилка їде до Львова» замість «Відправлення прибуло до сортувального терміналу».</p>
+<p><strong>Назви сутностей.</strong> Поштомат — Kite Box, сортувальний центр — Kite Hub, бізнес-кабінет — Kite Business. Номер відправлення в стилі UPU S10: <code>KT123456785UA</code> (2 літери сервісу, 8 цифр, контрольна цифра, код країни); у вебі показуємо групами: <code>KT 1234 5678 5 UA</code>.</p>
+</section>
+<section aria-labelledby="s2" class="doc-sec"><h2 id="s2"><span class="h2-num">02</span><span class="h2-text">Бізнес-модель</span></h2>
+<p>Kite заробляє на тарифі доставки, а додаткові послуги (післяплата, страхування, пакування, платне зберігання, переадресація після прибуття) і підписки Kite Business дають маржу зверху. Усі суми нижче — модельні припущення для демо в гривнях, вони живуть у pricing-service і змінюються без релізу.</p>
+<h3 id="s2-1">Сегменти клієнтів</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Сегмент</th>
+<th>Хто це</th>
+<th>Що їм важливо</th>
+<th>Канал</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C2C</td>
+<td>Люди, що шлють одне одному речі й документи</td>
+<td>Ціна, поштомат поруч, простота</td>
+<td>Застосунок, веб</td>
+</tr>
+<tr>
+<td>B2C-продавці</td>
+<td>Інтернет-магазини, продавці з маркетплейсів</td>
+<td>Післяплата, масове створення, API, повернення</td>
+<td>Kite Business, API</td>
+</tr>
+<tr>
+<td>B2B</td>
+<td>Компанії з документообігом і вантажами</td>
+<td>Рахунки, акти, вантажні відправлення</td>
+<td>Kite Business</td>
+</tr>
+<tr>
+<td>Отримувачі</td>
+<td>Усі, хто отримує посилки</td>
+<td>Відстеження, гнучкість, переадресація</td>
+<td>Застосунок, веб, публічне відстеження</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s2-2">Ціннісна пропозиція</h3>
+<ul>
+<li>Відправка без друку етикетки: QR із застосунку сканується у відділенні чи поштоматі.</li>
+<li>Повна прозорість: кожен скан у мережі видно в таймлайні, прогноз дати доставки уточнюється на кожному кроці.</li>
+<li>Керування доставкою з телефону: переадресація, довірена особа, відпустка, продовження зберігання.</li>
+<li>Для бізнесу: післяплата з виплатою на рахунок, API і вебхуки, масове створення з CSV, легкі повернення.</li>
+</ul>
+<h3 id="s2-3">Джерела доходу</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Джерело</th>
+<th>Модель ціни</th>
+<th>Хто платить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Доставка</td>
+<td>Зона × вагова категорія × тип, з урахуванням об'ємної ваги</td>
+<td>Відправник, отримувач або бізнес-рахунок</td>
+</tr>
+<tr>
+<td>Післяплата (COD)</td>
+<td>20 грн + 2% від суми</td>
+<td>Отримувач або відправник (налаштування)</td>
+</tr>
+<tr>
+<td>Оголошена вартість (страхування)</td>
+<td>Безкоштовно до 500 грн, далі 0,5% від суми</td>
+<td>Платник доставки</td>
+</tr>
+<tr>
+<td>Пакування</td>
+<td>Від 15 грн (конверт) до 120 грн (коробка L з наповнювачем)</td>
+<td>Відправник</td>
+</tr>
+<tr>
+<td>Платне зберігання</td>
+<td>Після 5 днів у відділенні: 15 / 25 / 35 грн на добу за розміром</td>
+<td>Отримувач</td>
+</tr>
+<tr>
+<td>Переадресація</td>
+<td>Безкоштовно в дорозі, 50 грн після прибуття</td>
+<td>Отримувач</td>
+</tr>
+<tr>
+<td>Доставка на адресу</td>
+<td>+45 грн до тарифу</td>
+<td>Платник доставки</td>
+</tr>
+<tr>
+<td>Камера зберігання в Kite Box</td>
+<td>30 грн за 3 доби</td>
+<td>Клієнт</td>
+</tr>
+<tr>
+<td>Kite Business</td>
+<td>Підписка: Start 0 грн, Pro 1 490 грн/міс, Enterprise за договором</td>
+<td>Бізнес</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s2-4">Тарифна сітка (модель)</h3>
+<p>Зони: «місто» (те саме місто), «область», «Україна». Об'ємна вага = Д × Ш × В (см) / 4000; тарифікуємо за більшою з фактичної та об'ємної.</p>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Тип і вага</th>
+<th>Місто, грн</th>
+<th>Область, грн</th>
+<th>Україна, грн</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Документи до 1 кг</td>
+<td>55</td>
+<td>65</td>
+<td>75</td>
+</tr>
+<tr>
+<td>Посилка до 2 кг</td>
+<td>70</td>
+<td>85</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Посилка до 5 кг</td>
+<td>85</td>
+<td>100</td>
+<td>120</td>
+</tr>
+<tr>
+<td>Посилка до 10 кг</td>
+<td>105</td>
+<td>125</td>
+<td>150</td>
+</tr>
+<tr>
+<td>Посилка до 30 кг</td>
+<td>150</td>
+<td>180</td>
+<td>220</td>
+</tr>
+<tr>
+<td>Вантаж понад 30 кг</td>
+<td>220 + 5 грн/кг</td>
+<td>260 + 6 грн/кг</td>
+<td>300 + 7 грн/кг</td>
+</tr>
+</tbody>
+</table></div>
+<p>Поштомат Kite Box приймає посилки до 20 кг у комірках S (10×40×60 см), M (20×40×60 см) і L (40×40×60 см). Відправка з поштомату дешевша на 10 грн, бо не потребує оператора.</p>
+<h3 id="s2-5">Плани Kite Business</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>План</th>
+<th>Ціна</th>
+<th>Що входить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Start</td>
+<td>0 грн</td>
+<td>Кабінет, ручне створення, CSV до 100 рядків, 1 користувач</td>
+</tr>
+<tr>
+<td>Pro</td>
+<td>1 490 грн/міс</td>
+<td>Знижка 10% на доставку, API 10 запитів/с, вебхуки, 10 користувачів, щотижнева виплата COD</td>
+</tr>
+<tr>
+<td>Enterprise</td>
+<td>За договором</td>
+<td>Індивідуальний тариф, щоденна виплата COD, SLA, необмежено користувачів</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s2-6">Лояльність (Kite Бали)</h3>
+<p>За кожну оплачену доставку клієнт отримує 3% балами (1 бал = 1 грн). Балами можна оплатити до 50% наступної доставки. Бали згорають через 12 місяців; промокоди дають фіксовану або відсоткову знижку з лімітом використань.</p>
+<h3 id="s2-7">Бізнес-модель на одній сторінці</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Блок</th>
+<th>Зміст</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ключові партнери</td>
+<td>Інтернет-магазини, платіжний провайдер, перевізники магістралі (у моделі — власний парк)</td>
+</tr>
+<tr>
+<td>Ключові активності</td>
+<td>Сортування, магістраль, видача, розвиток мережі Kite Box, підтримка</td>
+</tr>
+<tr>
+<td>Ключові ресурси</td>
+<td>Мережа хабів і точок, платформа, дані про маршрути для прогнозів</td>
+</tr>
+<tr>
+<td>Канали</td>
+<td>Застосунок, веб, Kite Business, API, відділення</td>
+</tr>
+<tr>
+<td>Відносини з клієнтами</td>
+<td>Самообслуговування, сповіщення, бали, підтримка в чаті</td>
+</tr>
+<tr>
+<td>Структура витрат</td>
+<td>Оренда точок, персонал, транспорт, поштомати, інфраструктура, еквайринг</td>
+</tr>
+<tr>
+<td>Метрики</td>
+<td>Посилок на добу, частка доставлених вчасно, частка видачі з першої спроби, середній чек, частка відправок без етикетки, NPS</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s2-8">Юніт-економіка посилки (модель)</h3>
+<p>Посилка до 5 кг по Україні за 120 грн. Собівартість у моделі: прийом 12 грн, сортування у двох хабах 16 грн, магістраль 28 грн, видача 10 грн, еквайринг 2 грн, накладні витрати 22 грн — разом 90 грн. Валова маржа — 30 грн, або 25%. Додаткові послуги (COD, страхування, зберігання) майже не додають собівартості, тому підвищують маржу.</p>
+</section>
+<section aria-labelledby="s3" class="doc-sec"><h2 id="s3"><span class="h2-num">03</span><span class="h2-text">Технічне завдання: ролі та функціональні вимоги</span></h2>
+<p>Система має 11 ролей з доступом за принципом «роль + скоуп локації»: оператор бачить лише своє відділення, сортувальник — свій хаб. Кожна вимога має ID (FR-…), посилання на фічу з погодженого списку і етап: MVP або v2.</p>
+<h3 id="s3-1">3.1 Ролі</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Роль</th>
+<th>Хто</th>
+<th>Інтерфейс</th>
+<th>Скоуп</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CLIENT</td>
+<td>Фізособа: відправник і отримувач</td>
+<td>Застосунок, веб</td>
+<td>Свої відправлення</td>
+</tr>
+<tr>
+<td>BIZ_OWNER</td>
+<td>Власник бізнес-акаунта</td>
+<td>Kite Business</td>
+<td>Своя організація</td>
+</tr>
+<tr>
+<td>BIZ_MEMBER</td>
+<td>Працівник бізнесу (склад, менеджер)</td>
+<td>Kite Business</td>
+<td>Своя організація, без фінансів і ключів API</td>
+</tr>
+<tr>
+<td>BRANCH_OPERATOR</td>
+<td>Оператор відділення</td>
+<td>Kite Ops + Kite Scan</td>
+<td>Своє відділення</td>
+</tr>
+<tr>
+<td>HUB_SORTER</td>
+<td>Сортувальник</td>
+<td>Kite Ops + Kite Scan</td>
+<td>Свій хаб</td>
+</tr>
+<tr>
+<td>HUB_SUPERVISOR</td>
+<td>Начальник зміни хабу</td>
+<td>Kite Ops</td>
+<td>Свій хаб, розбіжності, рейси</td>
+</tr>
+<tr>
+<td>DRIVER</td>
+<td>Водій магістралі</td>
+<td>Kite Scan</td>
+<td>Свої рейси</td>
+</tr>
+<tr>
+<td>COURIER</td>
+<td>Кур'єр доставки на адресу (мінімальний сценарій)</td>
+<td>Kite Scan</td>
+<td>Свої завдання на день</td>
+</tr>
+<tr>
+<td>DISPATCHER</td>
+<td>Диспетчер мережі</td>
+<td>Kite Ops</td>
+<td>Уся мережа, лише читання + інциденти</td>
+</tr>
+<tr>
+<td>SUPPORT</td>
+<td>Підтримка</td>
+<td>Kite Ops</td>
+<td>Пошук відправлень, тікети, претензії</td>
+</tr>
+<tr>
+<td>ADMIN</td>
+<td>Адміністратор</td>
+<td>Kite Ops</td>
+<td>Усе: мережа, тарифи, користувачі</td>
+</tr>
+</tbody>
+</table></div>
+<p>Окремо існують сервісні акаунти: пристрої Kite Box, стаціонарні сканери-заглушки, симулятор.</p>
+<h3 id="s3-2">3.2 Матриця доступів (скорочено)</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Дія</th>
+<th>CLIENT</th>
+<th>BIZ</th>
+<th>BRANCH_OP</th>
+<th>HUB</th>
+<th>DRIVER</th>
+<th>SUPPORT</th>
+<th>ADMIN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Створити відправлення</td>
+<td>Так</td>
+<td>Так</td>
+<td>Так (за клієнта)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Бачити повні дані відправлення</td>
+<td>Своє</td>
+<td>Своєї орг.</td>
+<td>У своєму відділенні</td>
+<td>Лише номер, вага, маршрут</td>
+<td>Лише номер</td>
+<td>Так</td>
+<td>Так</td>
+</tr>
+<tr>
+<td>Сканувати прийом / видачу</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Сканувати в хабі, мішки</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Завантаження / розвантаження рейсу</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+<td>Так</td>
+<td>Так</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Переадресація, довірена особа</td>
+<td>Отримувач</td>
+<td>Відправник-бізнес</td>
+<td>За зверненням клієнта</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+<td>Так</td>
+</tr>
+<tr>
+<td>Претензії</td>
+<td>Створити</td>
+<td>Створити</td>
+<td>Створити за клієнта</td>
+<td>Позначити пошкодження</td>
+<td>—</td>
+<td>Розглядати</td>
+<td>Так</td>
+</tr>
+<tr>
+<td>Тарифи, мережа, ролі</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+</tbody>
+</table></div>
+<p>Повну матрицю тримаємо в коді як перелік дозволів (permissions) на кшталт <code>shipment:read:own</code>, <code>scan:hub</code>, <code>tariff:write</code>; ролі — набори дозволів у Keycloak.</p>
+<h3 id="s3-3">3.3 Акаунт і профіль</h3>
+<ul>
+<li><strong class="req">FR-101</strong> Реєстрація і вхід за номером телефону з одноразовим кодом (SMS через емулятор); email необов'язковий. MVP.</li>
+<li><strong class="req">FR-102</strong> Мультиномер: до 3 номерів в одному акаунті, кожен підтверджується кодом; перемикач активного номера, індикатор посилок на кожному (C9). v2.</li>
+<li><strong class="req">FR-103</strong> Довірені особи: ПІБ і телефон людей, яким дозволено отримувати мої посилки за замовчуванням (D4). MVP.</li>
+<li><strong class="req">FR-104</strong> Збережені адреси й улюблені точки (відділення, Kite Box). MVP.</li>
+<li><strong class="req">FR-105</strong> Налаштування сповіщень по каналах і подіях, тиха година. MVP.</li>
+<li><strong class="req">FR-106</strong> Мова (українська, англійська) і тема (світла, темна, системна) (K2). MVP.</li>
+</ul>
+<h3 id="s3-4">3.4 Створення відправлення</h3>
+<ul>
+<li><strong class="req">FR-201</strong> Майстер створення у 4 кроки: звідки → куди → що (тип, місця, вага, габарити, опис, оголошена вартість) → послуги та оплата (A1). MVP.</li>
+<li><strong class="req">FR-202</strong> Типи: документи, посилка, вантаж; вантаж — лише між вантажними відділеннями (A2). MVP.</li>
+<li><strong class="req">FR-203</strong> Багатомісне відправлення: до 20 місць, кожне має свій штрих-код <code>KT…UA-01</code> (A3). MVP.</li>
+<li><strong class="req">FR-204</strong> Калькулятор вартості в реальному часі з розбивкою: доставка, послуги, знижка, бали (A10). MVP.</li>
+<li><strong class="req">FR-205</strong> Об'ємна вага рахується автоматично; при прийомі оператор вводить фактичні вагу й габарити, і різниця в ціні доплачується або повертається. MVP.</li>
+<li><strong class="req">FR-206</strong> Оголошена вартість (страхування): поле суми, від неї залежить ліміт компенсації за претензією (A4). v2.</li>
+<li><strong class="req">FR-207</strong> Післяплата: сума, хто платить комісію, реквізити отримання (картка або бізнес-рахунок) (A5). v2.</li>
+<li><strong class="req">FR-208</strong> Платник: відправник, отримувач або бізнес-рахунок за договором (A6). MVP.</li>
+<li><strong class="req">FR-209</strong> Пакування як послуга з вибором типу (конверт, коробка S/M/L, плівка) (A7). v2.</li>
+<li><strong class="req">FR-210</strong> Після створення — QR-код і короткий код для відправки без етикетки; етикетку друкує оператор при прийомі (A8). MVP.</li>
+<li><strong class="req">FR-211</strong> Перевірка обмежень: габарити й вага для Kite Box, заборонені вкладення (чекбокс згоди), доступність послуг у точці. MVP.</li>
+<li><strong class="req">FR-212</strong> Чернетки й «повторити відправлення» з історії. MVP.</li>
+</ul>
+<h3 id="s3-5">3.5 Мережа і точки</h3>
+<ul>
+<li><strong class="req">FR-301</strong> Карта відділень і Kite Box з фільтрами: тип, послуги, відкрито зараз, вільні комірки потрібного розміру (B1). MVP.</li>
+<li><strong class="req">FR-302</strong> Картка точки: адреса, графік, вихідні, обмеження ваги, послуги, маршрут від мене (B1). MVP.</li>
+</ul>
+<h3 id="s3-6">3.6 Kite Box</h3>
+<ul>
+<li><strong class="req">FR-401</strong> Комірки S/M/L, стан кожної: вільна, зайнята, зарезервована, несправна (B2). MVP.</li>
+<li><strong class="req">FR-402</strong> Відкриття комірки: кнопкою в застосунку (віддалено) або 6-значним кодом на екрані поштомату (B2). MVP.</li>
+<li><strong class="req">FR-403</strong> Безкоштовне зберігання 3 доби; продовження на 24 години в застосунку (раз); потім посилку переміщують у найближче відділення (D6). MVP.</li>
+<li><strong class="req">FR-404</strong> Зона доступності: посилку кладуть у нижні комірки на запит отримувача (D7). v2.</li>
+<li><strong class="req">FR-405</strong> Мульти-комірка: кілька посилок одного отримувача в одній комірці з одним кодом (D8). v2.</li>
+<li><strong class="req">FR-406</strong> Камера зберігання: клієнт резервує комірку, кладе речі, забирає сам або передає код іншій людині (J1). v2.</li>
+</ul>
+<h3 id="s3-7">3.7 Відстеження</h3>
+<ul>
+<li><strong class="req">FR-501</strong> Таймлайн подій із людськими описами, точкою мережі і часом; лінія маршруту на карті від точки до точки (C1). MVP.</li>
+<li><strong class="req">FR-502</strong> Прогнозована дата доставки: в MVP — правилами (норматив за маршрутом), далі — ML-модель (C3, AI-2). MVP.</li>
+<li><strong class="req">FR-503</strong> Публічне відстеження за номером без входу: статус, місто, прогноз; імена маскуються («Андрій Ш.»), адреси й телефони приховані (C7). MVP.</li>
+<li><strong class="req">FR-504</strong> Дашборд «Мені / Від мене / Архів» — відправлення підтягуються за номером телефону без введення номерів (C8). MVP.</li>
+<li><strong class="req">FR-505</strong> Сторонні номери: клієнт зберігає номер іншого перевізника з підписом; статус вводить вручну, справжньої інтеграції немає (C10). v2.</li>
+</ul>
+<h3 id="s3-8">3.8 Сповіщення</h3>
+<ul>
+<li><strong class="req">FR-601</strong> Події для сповіщень: створено, прийнято, прибуло в місто, готове до отримання, нагадування про зберігання, доставлено, повернення, зміна прогнозу більш ніж на добу, оплата (C2). MVP.</li>
+<li><strong class="req">FR-602</strong> Канали: push у застосунок, web push, email, SMS (SMS — емулятор). Вибір каналу за налаштуваннями та важливістю події. MVP.</li>
+</ul>
+<h3 id="s3-9">3.9 Керування доставкою</h3>
+<ul>
+<li><strong class="req">FR-701</strong> Переадресація на інше відділення, Kite Box або адресу; безкоштовно до прибуття, 50 грн після (D1). MVP.</li>
+<li><strong class="req">FR-702</strong> «Відпустка»: утримати посилку у відділенні до 14 днів без плати за зберігання, лише до прибуття (D2). v2.</li>
+<li><strong class="req">FR-703</strong> Інший отримувач / довірена особа на конкретне відправлення; відправник може заборонити (D4). MVP.</li>
+<li><strong class="req">FR-704</strong> Платне зберігання після 5 безкоштовних днів у відділенні, оплата в застосунку; через 14 днів — автоповернення (D6). MVP.</li>
+<li><strong class="req">FR-705</strong> Відмова від посилки отримувачем → автоматичне повернення відправнику; хто платить за повернення, визначає правило тарифу (D9). MVP.</li>
+<li><strong class="req">FR-706</strong> Кожна дія доступна лише в дозволених станах (див. розділ 7) і має ціну з pricing-service. MVP.</li>
+</ul>
+<h3 id="s3-10">3.10 Повернення і претензії</h3>
+<ul>
+<li><strong class="req">FR-801</strong> Повернення створюється як нове відправлення, пов'язане з первинним (<code>return_of</code>), і проходить ту ж мережу (E1). MVP.</li>
+<li><strong class="req">FR-802</strong> Легкі повернення для бізнесу: магазин вмикає повернення, покупець створює його за номером замовлення без етикетки (E2). v2.</li>
+<li><strong class="req">FR-803</strong> Претензія: тип (пошкодження, втрата, затримка, недостача), опис, фото, сума; статуси «подано → на розгляді → потрібні дані → задоволено / відхилено → виплачено» (E3). MVP.</li>
+<li><strong class="req">FR-804</strong> Посилка без сканів довше нормативу автоматично стає кандидатом у LOST і створює інцидент для диспетчера. MVP.</li>
+</ul>
+<h3 id="s3-11">3.11 Оплата і бали</h3>
+<ul>
+<li><strong class="req">FR-901</strong> Онлайн-оплата карткою через платіжну заглушку: сторінка оплати, 3-D Secure, успіх, відмова, таймаут, повернення коштів (G1). MVP.</li>
+<li><strong class="req">FR-902</strong> Оплата на касі відділення (готівка або термінал — позначка оператора). MVP.</li>
+<li><strong class="req">FR-903</strong> Kite Бали та промокоди (G2). v2.</li>
+<li><strong class="req">FR-904</strong> Виплата післяплати: отримувачу коштів на картку або на рахунок бізнесу за розкладом плану. v2.</li>
+</ul>
+<h3 id="s3-12">3.12 Kite Business</h3>
+<ul>
+<li><strong class="req">FR-1001</strong> Організація, учасники, ролі BIZ_OWNER і BIZ_MEMBER, реквізити, договір (I1). v2.</li>
+<li><strong class="req">FR-1002</strong> Масове створення з CSV: шаблон, перевірка рядків, звіт про помилки, створення пачкою (I1). v2.</li>
+<li><strong class="req">FR-1003</strong> API-ключі з обмеженням прав і частоти, вебхуки на зміну статусу з підписом HMAC і повторними спробами (I1). v2.</li>
+<li><strong class="req">FR-1004</strong> Реєстри (акти приймання-передачі) на пачку відправлень, рахунки та акти за місяць (I2). v2.</li>
+<li><strong class="req">FR-1005</strong> Аналітика: кількість, вчасність, повернення, сума COD. v2.</li>
+</ul>
+<h3 id="s3-13">3.13 Kite Ops (персонал)</h3>
+<ul>
+<li><strong class="req">FR-1101</strong> Робоче місце відділення: прийом (скан QR, введення ваги й габаритів, оплата, друк етикетки PDF), видача (скан або пошук, код підтвердження отримувача, видача довіреній особі), прийом повернень (F5). MVP.</li>
+<li><strong class="req">FR-1102</strong> Робоче місце хабу: розвантаження рейсу, сортувальна підказка «куди класти», формування й закриття мішків і контейнерів, завантаження (F2, F4). MVP.</li>
+<li><strong class="req">FR-1103</strong> Мережа: точки, хаби, лінії сортування, таблиця маршрутизації, графіки рейсів (F1). MVP.</li>
+<li><strong class="req">FR-1104</strong> Рейси і маніфести: створення рейсу, маніфест, звірка «очікували / відскановано», акти розбіжностей (F3). MVP.</li>
+<li><strong class="req">FR-1105</strong> Диспетчерська: карта мережі, завантаження хабів, посилки без сканів, інциденти (F7). v2.</li>
+<li><strong class="req">FR-1106</strong> Користувачі й ролі, журнал дій персоналу (K1). MVP.</li>
+<li><strong class="req">FR-1107</strong> Пошук відправлення за номером, телефоном, ПІБ — для SUPPORT і ADMIN; перегляд персональних даних логується. MVP.</li>
+</ul>
+<h3 id="s3-14">3.14 Підтримка</h3>
+<ul>
+<li><strong class="req">FR-1201</strong> Тікети з прив'язкою до відправлення, чат у застосунку й вебі, статуси і пріоритети (K4). v2.</li>
+</ul>
+<p>Сканування і пейринг телефону описані в розділі 10, AI-фічі — в розділі 11.</p>
+</section>
+<section aria-labelledby="s4" class="doc-sec"><h2 id="s4"><span class="h2-num">04</span><span class="h2-text">Нефункціональні вимоги</span></h2>
+<p>Цілі задані для локального стенду на одному ноутбуці (16 ГБ RAM) і перевіряються навантажувальним тестом k6; це навчальний масштаб, а не продакшен.</p>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Категорія</th>
+<th>Вимога</th>
+<th>Як перевіряємо</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="id-cell">NFR-01</td>
+<td>Продуктивність</td>
+<td>Публічне відстеження: p95 &lt; 150 мс при 200 запитах/с</td>
+<td>k6, Grafana</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-02</td>
+<td>Продуктивність</td>
+<td>Обробка скану від телефону до запису в таймлайн: p95 &lt; 1 с</td>
+<td>Трейс OpenTelemetry від scan-service до tracking-service</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-03</td>
+<td>Пропускна здатність</td>
+<td>Інжест сканів: 500 сканів/с на хабах сумарно</td>
+<td>Симулятор + k6</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-04</td>
+<td>Надійність</td>
+<td>Жодна подія сканування не губиться: outbox у кожному сервісі, Kafka з acks=all, ідемпотентні споживачі</td>
+<td>Тест «вбити сервіс посеред потоку»</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-05</td>
+<td>Узгодженість</td>
+<td>Між сервісами — eventual consistency, затримка &lt; 2 с; статус відправлення змінює лише shipment-service</td>
+<td>Інтеграційні тести</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-06</td>
+<td>Ідемпотентність</td>
+<td>Усі POST, що створюють сутності або платежі, приймають заголовок Idempotency-Key</td>
+<td>Контрактні тести</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-07</td>
+<td>Безпека</td>
+<td>OAuth 2.1 / OIDC через Keycloak, JWT з короткими токенами (5 хв) і refresh; персонал — обов'язково 2FA (TOTP)</td>
+<td>Пентест-чекліст OWASP ASVS L1</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-08</td>
+<td>Безпека</td>
+<td>RBAC + скоуп локації на рівні сервісу, а не лише шлюзу</td>
+<td>Тести доступів на кожен ендпоїнт</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-09</td>
+<td>Приватність</td>
+<td>Публічне відстеження не показує телефонів, адрес і повних імен; доступ персоналу до персональних даних пишеться в журнал</td>
+<td>Аудит-лог, тести</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-10</td>
+<td>Спостережуваність</td>
+<td>Трейси (OpenTelemetry → Tempo), метрики (Prometheus), логи (Loki), дашборди Grafana; кожен запит має trace id</td>
+<td>Дашборд «Здоров'я системи»</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-11</td>
+<td>Доступність UI</td>
+<td>WCAG 2.2 AA: контраст, клавіатура, підписи для скрінрідерів; мінімальна ціль натискання 44 px</td>
+<td>Axe, ручна перевірка</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-12</td>
+<td>Локалізація</td>
+<td>Українська і англійська, формати дат, валюти й телефонів для України</td>
+<td>Перевірка всіх екранів</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-13</td>
+<td>Розгортання</td>
+<td>Увесь стенд піднімається однією командою <code>docker compose up</code>; профілі core / full / observability</td>
+<td>README, чиста машина</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-14</td>
+<td>Якість коду</td>
+<td>Покриття юніт-тестами доменної логіки ≥ 70%; контрактні тести API (Spring Cloud Contract або Pact); Testcontainers для інтеграційних</td>
+<td>CI (GitHub Actions)</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-15</td>
+<td>Версіонування API</td>
+<td>URL-версія <code>/api/v1</code>, зворотна сумісність подій у межах major-версії</td>
+<td>Ревʼю схем</td>
+</tr>
+<tr>
+<td class="id-cell">NFR-16</td>
+<td>Зберігання даних</td>
+<td>Події відстеження — 2 роки; персональні дані неактивних клієнтів анонімізуються через 3 роки</td>
+<td>Задача-планувальник</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section aria-labelledby="s5" class="doc-sec"><h2 id="s5"><span class="h2-num">05</span><span class="h2-text">Архітектура і карта сервісів</span></h2>
+<p>Kite — це 12 сервісів на Java (Spring Boot 3, Java 21), 5 на Go і 1 на Python (плюс симулятор), які спілкуються синхронно через REST за шлюзом і асинхронно через Kafka. Кожен сервіс володіє своєю базою; статус відправлення змінює тільки shipment-service, решта реагує на його події.</p>
+<figure class="dia-wrap"><div class="dia-scroll"><svg aria-label="Клієнти заходять через три входи, сервіси говорять через Kafka" class="dia" font-family="var(--f-body)" font-size="12" role="img" viewbox="0 0 760 628"><defs><marker id="ar-arrow" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="9" refy="5" viewbox="0 0 10 10"><path d="M0 0L10 5L0 10z" fill="var(--d-edge)"></path></marker></defs><text fill="var(--d-ink)" font-size="15" font-weight="600" x="24" y="32">Клієнти заходять через три входи, сервіси говорять через Kafka</text><g><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="134" x2="134" y1="148" y2="180"></line><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="496" x2="496" y1="148" y2="180"></line><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="664" x2="664" y1="148" y2="180"></line><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="134" x2="134" y1="228" y2="260"></line><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="496" x2="496" y1="228" y2="260"></line><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="664" x2="664" y1="228" y2="260"></line><line marker-end="url(#ar-arrow)" marker-start="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="196" x2="196" y1="460" y2="492"></line><line marker-end="url(#ar-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="564" x2="564" y1="460" y2="492"></line><line stroke="var(--d-edge)" stroke-dasharray="3 3" stroke-width="1.25" x1="244" x2="260" y1="204" y2="204"></line></g><g font-size="11.5"><text fill="var(--d-quiet)" x="142" y="169">REST /api/v1</text><text fill="var(--d-quiet)" x="504" y="169">WebSocket</text><text fill="var(--d-quiet)" x="672" y="169">MQTT</text><text fill="var(--d-quiet)" x="204" y="481">публікують і споживають</text><text fill="var(--d-quiet)" x="572" y="481">кожен — у свою базу</text></g><g><rect fill="none" height="96" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="52"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="72">Клієнти</text><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="40" y="82"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="154.8" y="82"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="269.6" y="82"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="384.4" y="82"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="499.2" y="82"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="614" y="82"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="93" y="102">Kite</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="93" y="120">Flutter</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="207.8" y="102">kite-web</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="207.8" y="120">Vue · клієнт</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="322.6" y="102">kite-business</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="322.6" y="120">Vue · бізнес</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="437.4" y="102">kite-ops</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="437.4" y="120">Vue · персонал</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="552.2" y="102">Kite Scan</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="552.2" y="120">телефон</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="667" y="102">Kite Box</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="667" y="120">емулятор</text></g><g><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="220" x="24" y="180"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="140" x="260" y="180"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="160" x="416" y="180"></rect><rect fill="none" fill-opacity="1" height="48" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="144" x="592" y="180"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="134" y="200">api-gateway</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="134" y="218">JWT, rate limit, маршрути</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="330" y="200">Keycloak</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="330" y="218">вхід, ролі, 2FA</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="496" y="200">realtime-service</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="496" y="218">Go · пейринг, живі дані</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="664" y="200">Mosquitto</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="664" y="218">пристрої</text></g><g><rect fill="none" height="200" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="260"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="280">Сервіси</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="end" x="720" y="280">статус відправлення змінює лише shipment</text><text fill="var(--d-quiet)" font-size="11.5" x="40" y="302">Java · Spring Boot</text><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="40" y="310"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="154.8" y="310"></rect><rect fill="var(--d-accent)" fill-opacity="0.12" height="32" rx="8" stroke="var(--d-accent)" stroke-width="2" width="106" x="269.6" y="310"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="384.4" y="310"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="499.2" y="310"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="614" y="310"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="40" y="350"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="154.8" y="350"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="269.6" y="350"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="384.4" y="350"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="499.2" y="350"></rect><text fill="var(--d-ink)" text-anchor="middle" x="93" y="330">customer</text><text fill="var(--d-ink)" text-anchor="middle" x="207.8" y="330">business</text><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="322.6" y="330">shipment</text><text fill="var(--d-ink)" text-anchor="middle" x="437.4" y="330">pricing</text><text fill="var(--d-ink)" text-anchor="middle" x="552.2" y="330">network</text><text fill="var(--d-ink)" text-anchor="middle" x="667" y="330">logistics</text><text fill="var(--d-ink)" text-anchor="middle" x="93" y="370">tracking</text><text fill="var(--d-ink)" text-anchor="middle" x="207.8" y="370">payment</text><text fill="var(--d-ink)" text-anchor="middle" x="322.6" y="370">notification</text><text fill="var(--d-ink)" text-anchor="middle" x="437.4" y="370">care</text><text fill="var(--d-ink)" text-anchor="middle" x="552.2" y="370">audit</text><text fill="var(--d-quiet)" font-size="11.5" x="40" y="404">Go</text><text fill="var(--d-quiet)" font-size="11.5" x="499.2" y="404">Python</text><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="40" y="412"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="154.8" y="412"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="269.6" y="412"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="384.4" y="412"></rect><rect fill="none" fill-opacity="1" height="32" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="106" x="499.2" y="412"></rect><text fill="var(--d-ink)" text-anchor="middle" x="93" y="432">scan</text><text fill="var(--d-ink)" text-anchor="middle" x="207.8" y="432">locker</text><text fill="var(--d-ink)" text-anchor="middle" x="322.6" y="432">mock-pay</text><text fill="var(--d-ink)" text-anchor="middle" x="437.4" y="432">sms-emu</text><text fill="var(--d-ink)" text-anchor="middle" x="552.2" y="432">ai-service</text></g><g><rect fill="var(--d-tint)" height="112" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="344" x="24" y="492"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="514">Kafka (KRaft)</text><text fill="var(--d-ink)" font-size="11.5" x="40" y="536">Доменні події у форматі CloudEvents</text><text fill="var(--d-ink)" font-size="11.5" x="40" y="552">Топіки: shipment, scan, logistics, locker,</text><text fill="var(--d-ink)" font-size="11.5" x="40" y="568">payment, customer, ai, care, audit</text><text fill="var(--d-quiet)" font-size="11.5" x="40" y="584">Outbox у кожному сервісі, ідемпотентні споживачі</text></g><g><rect fill="none" height="112" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="344" x="392" y="492"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="408" y="512">Дані й допоміжне</text><rect fill="none" fill-opacity="1" height="30" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="152" x="408" y="522"></rect><rect fill="none" fill-opacity="1" height="30" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="152" x="568" y="522"></rect><rect fill="none" fill-opacity="1" height="30" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="152" x="408" y="560"></rect><rect fill="none" fill-opacity="1" height="30" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="152" x="568" y="560"></rect><text fill="var(--d-ink)" text-anchor="middle" x="484" y="541">PostgreSQL + PostGIS</text><text fill="var(--d-ink)" text-anchor="middle" x="644" y="541">Redis</text><text fill="var(--d-ink)" text-anchor="middle" x="484" y="579">MinIO (S3)</text><text fill="var(--d-ink)" text-anchor="middle" x="644" y="579">Mailpit, ntfy, тайли</text></g></svg></div><figcaption>карта сервісів · клієнти, входи, сервіси, брокер, дані</figcaption></figure>
+<p>Запити йдуть зверху вниз через один із трьох входів; після цього сервіси не викликають один одного напряму, а обмінюються подіями через Kafka (винятки — розрахунок ціни й пошук маршруту).</p>
+<h3 id="s5-1">5.1 Сервіси</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Сервіс</th>
+<th>Мова</th>
+<th>Відповідальність</th>
+<th>Сховище</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api-gateway</td>
+<td>Java (Spring Cloud Gateway)</td>
+<td>Єдина точка входу, перевірка JWT, rate limit, маршрутизація</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>Keycloak</td>
+<td>— (готовий продукт)</td>
+<td>Користувачі, ролі, OTP, 2FA персоналу, клієнти OAuth</td>
+<td>Postgres</td>
+</tr>
+<tr>
+<td>customer-service</td>
+<td>Java</td>
+<td>Профілі, мультиномер, довірені особи, адреси, налаштування</td>
+<td>Postgres <code>customer</code></td>
+</tr>
+<tr>
+<td>business-service</td>
+<td>Java</td>
+<td>Організації, учасники, API-ключі, вебхуки, імпорт CSV, реєстри</td>
+<td>Postgres <code>business</code></td>
+</tr>
+<tr>
+<td>shipment-service</td>
+<td>Java</td>
+<td>Накладні, місця, стейт-машина, керування доставкою, повернення, саги</td>
+<td>Postgres <code>shipment</code></td>
+</tr>
+<tr>
+<td>pricing-service</td>
+<td>Java</td>
+<td>Тарифи, розрахунок вартості, промокоди</td>
+<td>Postgres <code>pricing</code> + Redis</td>
+</tr>
+<tr>
+<td>network-service</td>
+<td>Java</td>
+<td>Відділення, Kite Box (довідник), хаби, лінії сортування, таблиця маршрутизації, розклад рейсів</td>
+<td>Postgres + PostGIS <code>network</code></td>
+</tr>
+<tr>
+<td>logistics-service</td>
+<td>Java</td>
+<td>Мішки й контейнери, рейси, маніфести, розбіжності</td>
+<td>Postgres <code>logistics</code></td>
+</tr>
+<tr>
+<td>tracking-service</td>
+<td>Java</td>
+<td>Журнал подій, таймлайн, дашборди «мені / від мене», публічне відстеження</td>
+<td>Postgres <code>tracking</code> (партиції) + Redis</td>
+</tr>
+<tr>
+<td>payment-service</td>
+<td>Java</td>
+<td>Платежі, повернення коштів, післяплата, виплати, бали, проводки</td>
+<td>Postgres <code>payment</code></td>
+</tr>
+<tr>
+<td>notification-service</td>
+<td>Java</td>
+<td>Шаблони, вибір каналів, доставка push / email / SMS</td>
+<td>Postgres <code>notification</code></td>
+</tr>
+<tr>
+<td>care-service</td>
+<td>Java</td>
+<td>Претензії і тікети підтримки</td>
+<td>Postgres <code>care</code> + MinIO (фото)</td>
+</tr>
+<tr>
+<td>audit-service</td>
+<td>Java</td>
+<td>Журнал дій персоналу і доступів до персональних даних</td>
+<td>Postgres <code>audit</code></td>
+</tr>
+<tr>
+<td>scan-service</td>
+<td>Go</td>
+<td>Прийом сканів (HTTP, MQTT), валідація, реєстр сканерів, сортувальна підказка</td>
+<td>Postgres <code>scan</code> + Redis</td>
+</tr>
+<tr>
+<td>realtime-service</td>
+<td>Go</td>
+<td>WebSocket: пейринг телефону з Kite Ops, живі оновлення таймлайну і дашбордів</td>
+<td>Redis</td>
+</tr>
+<tr>
+<td>locker-service</td>
+<td>Go</td>
+<td>Емулятор Kite Box: комірки, коди, команди відкриття через MQTT</td>
+<td>Postgres <code>locker</code></td>
+</tr>
+<tr>
+<td>mock-pay</td>
+<td>Go</td>
+<td>Емулятор платіжного провайдера: сторінка оплати, 3-D Secure, вебхуки</td>
+<td>Postgres <code>mockpay</code></td>
+</tr>
+<tr>
+<td>sms-gateway-emu</td>
+<td>Go</td>
+<td>Емулятор SMS-шлюзу з веб-інтерфейсом «телефону»</td>
+<td>SQLite</td>
+</tr>
+<tr>
+<td>ai-service</td>
+<td>Python (FastAPI)</td>
+<td>Прогноз дати доставки, ризик невдалої доставки; у v2 — фото → накладна, пошкодження, асистент</td>
+<td>Postgres <code>ai</code> + файли моделей</td>
+</tr>
+<tr>
+<td>simulator</td>
+<td>Python</td>
+<td>Рух посилок мережею (окремий етап)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s5-2">5.2 Клієнтські застосунки</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Застосунок</th>
+<th>Стек</th>
+<th>Що містить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>kite-web</td>
+<td>Vue 3, Vite, TypeScript, Pinia, Vue Router, vue-i18n</td>
+<td>Клієнтський кабінет і публічне відстеження</td>
+</tr>
+<tr>
+<td>kite-business</td>
+<td>Vue 3 (той самий UI-кит)</td>
+<td>Кабінет Kite Business</td>
+</tr>
+<tr>
+<td>kite-ops</td>
+<td>Vue 3 (той самий UI-кит)</td>
+<td>Робочі місця персоналу, адмінка, диспетчерська</td>
+</tr>
+<tr>
+<td>kite-box-screen</td>
+<td>Vue 3</td>
+<td>Екран поштомату для емулятора Kite Box</td>
+</tr>
+<tr>
+<td>kite-mobile</td>
+<td>Flutter 3, Riverpod, go_router, Dio, mobile_scanner</td>
+<td>Клієнтський застосунок + режим Kite Scan для персоналу</td>
+</tr>
+</tbody>
+</table></div>
+<p>Спільний UI-кит <code>@kite/ui</code> (Vue-компоненти + дизайн-токени) живе в монорепо і використовується всіма веб-застосунками; ті самі токени генеруються для Flutter.</p>
+<h3 id="s5-3">5.3 Інфраструктура</h3>
+<ul>
+<li><strong>Брокери:</strong> Kafka (режим KRaft, без ZooKeeper) для доменних подій; Mosquitto (MQTT) для пристроїв — Kite Box і стаціонарних сканерів-заглушок.</li>
+<li><strong>Дані:</strong> один контейнер PostgreSQL 16 з PostGIS і окремою базою на кожен сервіс; Redis для кешу, rate limit і сесій пейрингу; MinIO як S3 для етикеток PDF, фото і моделей.</li>
+<li><strong>Карти:</strong> MapLibre GL у Vue і Flutter, векторні тайли України у файлі PMTiles (Protomaps), які роздає локальний nginx; геокодер Photon з українським вилученням OpenStreetMap. Усе безкоштовне, локальне і повністю стилізується під бренд.</li>
+<li><strong>Сповіщення:</strong> web push через стандарт VAPID (без сторонніх сервісів); мобільний push через самостійно розгорнутий ntfy; email ловить Mailpit (видно справжні листи у веб-інтерфейсі); SMS — sms-gateway-emu.</li>
+<li><strong>Спостережуваність:</strong> OpenTelemetry Collector → Tempo (трейси), Prometheus (метрики), Loki (логи), Grafana.</li>
+</ul>
+<h3 id="s5-4">5.4 Патерни взаємодії</h3>
+<ol>
+<li><strong>База на сервіс.</strong> Жодних спільних таблиць; дані інших сервісів — через API або локальні проєкції з подій.</li>
+<li><strong>Transactional outbox.</strong> Сервіс пише зміну і подію в одній транзакції у таблицю <code>outbox</code>, окремий процес публікує її в Kafka. Це гарантує, що подія не загубиться і не з'явиться без зміни.</li>
+<li><strong>Ідемпотентні споживачі.</strong> Кожен споживач тримає таблицю <code>processed_event(event_id)</code> і пропускає повтори.</li>
+<li><strong>Сага-оркестрація</strong> в shipment-service для «створити → порахувати → оплатити → підтвердити» і для повернень, з компенсаціями (скасування платежу, звільнення комірки).</li>
+<li><strong>CQRS у tracking-service.</strong> Запис — журнал подій, читання — готові проєкції (таймлайн, «мої відправлення», публічний статус).</li>
+<li><strong>Формат подій</strong> — CloudEvents у JSON; схеми (JSON Schema) у репозиторії <code>kite-contracts</code>, з нього генеруються Java-класи, Go-структури і Dart-моделі.</li>
+<li><strong>Синхронні виклики між сервісами</strong> — мінімальні: розрахунок ціни і пошук маршруту (з кешем). Тайм-аути 2 с і circuit breaker (Resilience4j).</li>
+</ol>
+<h3 id="s5-5">5.5 Головний потік: скан у хабі</h3>
+<ol>
+<li>Сортувальник сканує посилку телефоном у режимі Kite Scan; телефон спарений з його сесією в Kite Ops.</li>
+<li>scan-service перевіряє скан (дубль, чи очікувалась посилка в цьому хабі), рахує сортувальну підказку з таблиці маршрутизації і публікує <code>scan.recorded</code>.</li>
+<li>shipment-service застосовує подію до стейт-машини (AT_HUB → SORTED) і публікує <code>shipment.status-changed</code>.</li>
+<li>tracking-service дописує подію в журнал і оновлює проєкції; ai-service перераховує прогноз.</li>
+<li>realtime-service показує підказку «лінія 7 → Львів» на екрані Kite Ops і на телефоні; клієнт, який дивиться таймлайн, бачить новий крок без оновлення сторінки.</li>
+</ol>
+<h3 id="s5-6">5.6 Структура монорепо</h3>
+<pre><code>kite/
+  contracts/          # OpenAPI, JSON Schema подій, генерація клієнтів
+  services/java/      # gateway, customer, business, shipment, pricing, network,
+                      # logistics, tracking, payment, notification, care, audit
+  services/go/        # scan, realtime, locker, mock-pay, sms-gateway-emu
+  services/python/    # ai-service, simulator
+  apps/web/           # kite-web, kite-business, kite-ops, kite-box-screen, ui-kit
+  apps/mobile/        # kite-mobile (Flutter)
+  infra/              # docker-compose, Keycloak realm, Grafana dashboards, тайли
+  docs/               # ADR, ця документація
+</code></pre>
+</section>
+<section aria-labelledby="s6" class="doc-sec"><h2 id="s6"><span class="h2-num">06</span><span class="h2-text">Схема бази даних</span></h2>
+<p>Кожен сервіс має власну базу в PostgreSQL 16; разом це близько 60 таблиць. Між базами немає зовнішніх ключів — лише ідентифікатори (UUID), які узгоджуються через події. Повний DDL — у файлі <code>schema.sql</code>, нижче — що де лежить і головні поля.</p>
+<figure class="dia-wrap"><div class="dia-scroll"><svg aria-label="Усе тримається на shipment; між сервісами — лише ідентифікатори" class="dia" font-family="var(--f-body)" font-size="11.5" role="img" viewbox="0 0 760 584"><text fill="var(--d-ink)" font-size="15" font-weight="600" x="24" y="28">Усе тримається на shipment; між сервісами — лише ідентифікатори</text><text fill="var(--d-quiet)" x="24" y="46">Логічна модель ядра; сірий підпис справа — сервіс-власник таблиці</text><g fill="none" stroke="var(--d-edge)" stroke-width="1.25"><path d="M240 100H260V216H280"></path><path d="M240 236H280"></path><path d="M240 396H260V288H280"></path><path d="M380 136V200"></path><path d="M520 100H500V216H480"></path><path d="M480 252H520"></path><path d="M380 304V360"></path><path d="M480 396H520"></path><path d="M620 432V488"></path><path d="M380 432V488"></path></g><g><text fill="var(--d-quiet)" x="388" y="172">звідки і куди</text><text fill="var(--d-quiet)" text-anchor="middle" x="260" y="230">1—N</text><text fill="var(--d-quiet)" text-anchor="middle" x="500" y="246">1—N</text><text fill="var(--d-quiet)" x="388" y="336">1—N місць</text><text fill="var(--d-quiet)" text-anchor="middle" x="500" y="388">вміст</text><text fill="var(--d-quiet)" x="388" y="464">скани</text><text fill="var(--d-quiet)" x="628" y="464">маніфест</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="40" y="64"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="52" y="86">payment</text><text fill="var(--d-quiet)" text-anchor="end" x="228" y="86">payment</text><text fill="var(--d-ink)" x="52" y="104">subject_id → shipment</text><text fill="var(--d-ink)" x="52" y="120">amount_kop, status</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="280" y="64"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="292" y="86">location</text><text fill="var(--d-quiet)" text-anchor="end" x="468" y="86">network</text><text fill="var(--d-ink)" x="292" y="104">kind, city_id, geom</text><text fill="var(--d-ink)" x="292" y="120">parent_hub_id</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="520" y="64"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="532" y="86">cell</text><text fill="var(--d-quiet)" text-anchor="end" x="708" y="86">locker</text><text fill="var(--d-ink)" x="532" y="104">locker_id → location</text><text fill="var(--d-ink)" x="532" y="120">assignment → shipment</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="40" y="200"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="52" y="222">customer</text><text fill="var(--d-quiet)" text-anchor="end" x="228" y="222">customer</text><text fill="var(--d-ink)" x="52" y="240">phones (до 3)</text><text fill="var(--d-ink)" x="52" y="256">trusted_person</text></g><g><rect fill="var(--d-accent)" fill-opacity="0.12" height="104" rx="8" stroke="var(--d-accent)" stroke-width="2" width="200" x="280" y="200"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="292" y="222">shipment</text><text fill="var(--d-quiet)" text-anchor="end" x="468" y="222">shipment</text><text fill="var(--d-ink)" x="292" y="240">tracking_number, status</text><text fill="var(--d-ink)" x="292" y="256">type, payer, ціна</text><text fill="var(--d-ink)" x="292" y="272">sender, recipient</text><text fill="var(--d-ink)" x="292" y="288">origin_id, destination_id</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="520" y="200"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="532" y="222">tracking_event</text><text fill="var(--d-quiet)" text-anchor="end" x="708" y="222">tracking</text><text fill="var(--d-ink)" x="532" y="240">shipment_id, code</text><text fill="var(--d-ink)" x="532" y="256">location_id, occurred_at</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="40" y="360"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="52" y="382">claim</text><text fill="var(--d-quiet)" text-anchor="end" x="228" y="382">care</text><text fill="var(--d-ink)" x="52" y="400">shipment_id, type</text><text fill="var(--d-ink)" x="52" y="416">status, суми</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="280" y="360"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="292" y="382">parcel</text><text fill="var(--d-quiet)" text-anchor="end" x="468" y="382">shipment</text><text fill="var(--d-ink)" x="292" y="400">shipment_id, seq, barcode</text><text fill="var(--d-ink)" x="292" y="416">вага, габарити</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="520" y="360"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="532" y="382">transport_unit</text><text fill="var(--d-quiet)" text-anchor="end" x="708" y="382">logistics</text><text fill="var(--d-ink)" x="532" y="400">barcode, kind, parent_id</text><text fill="var(--d-ink)" x="532" y="416">items: штрих-коди</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="280" y="488"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="292" y="510">scan</text><text fill="var(--d-quiet)" text-anchor="end" x="468" y="510">scan</text><text fill="var(--d-ink)" x="292" y="528">barcode → parcel / unit</text><text fill="var(--d-ink)" x="292" y="544">kind, location, device</text></g><g><rect fill="none" fill-opacity="1" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="200" x="520" y="488"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="532" y="510">trip, manifest</text><text fill="var(--d-quiet)" text-anchor="end" x="708" y="510">logistics</text><text fill="var(--d-ink)" x="532" y="528">vehicle, driver</text><text fill="var(--d-ink)" x="532" y="544">from → to, manifest_item</text></g></svg></div><figcaption>логічна ER-модель ядра · 11 таблиць, 8 сервісів</figcaption></figure>
+<p>Зв'язки на діаграмі логічні: між сервісами немає зовнішніх ключів, тож цілісність тримають події і перевірки в коді; всередині однієї бази (shipment → parcel) — звичайні FK.</p>
+<h3 id="s6-1">6.1 Домовленості</h3>
+<ul>
+<li>Первинні ключі — UUID v7 (впорядковані за часом, генеруються в застосунку).</li>
+<li>Гроші — <code>bigint</code> у копійках, валюта завжди UAH; вага — у грамах, розміри — у міліметрах.</li>
+<li>Час — <code>timestamptz</code> в UTC; у застосунках показуємо Europe/Kyiv.</li>
+<li>Переліки — <code>text</code> з <code>CHECK</code>, а не типи <code>enum</code> у Postgres: їх простіше розширювати міграціями.</li>
+<li>Оптимістичне блокування — колонка <code>version</code> у сутностей, що змінюються конкурентно (відправлення, комірка, мішок).</li>
+<li>У кожній базі є <code>outbox</code> (вихідні події) і <code>processed_event</code> (вже оброблені вхідні).</li>
+<li>Міграції — Flyway у Java-сервісах, golang-migrate у Go, Alembic у Python.</li>
+</ul>
+<h3 id="s6-2">6.2 Таблиці по сервісах</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Сервіс</th>
+<th>Таблиця</th>
+<th>Призначення і ключові поля</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>customer</td>
+<td>customer</td>
+<td>Профіль: keycloak_user_id, ПІБ, email, locale, theme, тиха година</td>
+</tr>
+<tr>
+<td>customer</td>
+<td>customer_phone</td>
+<td>Мультиномер: phone (E.164, унікальний), is_primary, verified_at; до 3 на клієнта</td>
+</tr>
+<tr>
+<td>customer</td>
+<td>trusted_person</td>
+<td>Довірені особи: ПІБ, телефон</td>
+</tr>
+<tr>
+<td>customer</td>
+<td>saved_address, favorite_point</td>
+<td>Збережені адреси і улюблені точки</td>
+</tr>
+<tr>
+<td>customer</td>
+<td>notification_preference, push_subscription</td>
+<td>Канали за типом події; підписки web push і ntfy</td>
+</tr>
+<tr>
+<td>business</td>
+<td>organization</td>
+<td>Назва, ЄДРПОУ, IBAN, план, розклад виплат COD</td>
+</tr>
+<tr>
+<td>business</td>
+<td>org_member</td>
+<td>Учасник і його роль в організації</td>
+</tr>
+<tr>
+<td>business</td>
+<td>api_key</td>
+<td>Префікс, хеш ключа, скоупи, ліміт частоти, revoked_at</td>
+</tr>
+<tr>
+<td>business</td>
+<td>webhook_endpoint, webhook_delivery</td>
+<td>Адреса, секрет HMAC, події; спроби доставки з next_attempt_at</td>
+</tr>
+<tr>
+<td>business</td>
+<td>import_job, registry, registry_item</td>
+<td>Імпорт CSV зі звітом; реєстри приймання-передачі</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>shipment</td>
+<td>tracking_number (13 символів), type, status, відправник, отримувач, звідки, куди (відділення / Kite Box / адреса), payer, declared_value, cod_amount, вага до оплати, price_total, eta, return_of, storage_free_until, hold_until, version</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>parcel</td>
+<td>Місце: seq, barcode (<code>KT…UA-01</code>), заявлені та фактичні вага й габарити</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>shipment_service</td>
+<td>Додаткові послуги: код, параметри, ціна</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>shipment_route</td>
+<td>Запланований маршрут: порядок, точка, тип (старт, хаб, фініш), плановий час</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>delivery_action</td>
+<td>Переадресація, відпустка, зміна отримувача, продовження, відмова: статус, ціна, хто запросив</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>authorized_recipient, pickup_code</td>
+<td>Хто може отримати конкретне відправлення; хеш коду видачі</td>
+</tr>
+<tr>
+<td>shipment</td>
+<td>status_history</td>
+<td>Локальна історія переходів стейт-машини з посиланням на подію-причину</td>
+</tr>
+<tr>
+<td>pricing</td>
+<td>tariff_version, tariff_rate</td>
+<td>Версії тарифів; ставка за тип × зону × вагову межу</td>
+</tr>
+<tr>
+<td>pricing</td>
+<td>service_price, promo_code, quote</td>
+<td>Ціни послуг; промокоди; кеш розрахунків на 15 хв</td>
+</tr>
+<tr>
+<td>network</td>
+<td>region, city</td>
+<td>Області й міста з кодами КАТОТТГ і координатами</td>
+</tr>
+<tr>
+<td>network</td>
+<td>location</td>
+<td>Відділення, вантажне відділення, Kite Box, обласний СЦ, магістральний хаб: код, місто, адреса, <code>geography(Point)</code>, ліміт ваги, послуги, батьківський хаб</td>
+</tr>
+<tr>
+<td>network</td>
+<td>opening_hours</td>
+<td>Графік по днях тижня</td>
+</tr>
+<tr>
+<td>network</td>
+<td>sort_line</td>
+<td>Лінії сортування хабу і їхній напрям</td>
+</tr>
+<tr>
+<td>network</td>
+<td>routing_rule</td>
+<td>Хаб + регіон або точка призначення → наступна точка і лінія; пріоритет</td>
+</tr>
+<tr>
+<td>network</td>
+<td>linehaul_schedule</td>
+<td>Розклад магістральних рейсів: звідки, куди, час відправлення, дні, тривалість</td>
+</tr>
+<tr>
+<td>logistics</td>
+<td>transport_unit, transport_unit_item</td>
+<td>Мішок, контейнер, палета (з вкладенням одне в одне) і їхній вміст</td>
+</tr>
+<tr>
+<td>logistics</td>
+<td>vehicle, trip</td>
+<td>Машини; рейси з плановими й фактичними часами, водієм і статусом</td>
+</tr>
+<tr>
+<td>logistics</td>
+<td>manifest, manifest_item</td>
+<td>Маніфест рейсу: які одиниці мають бути в машині</td>
+</tr>
+<tr>
+<td>logistics</td>
+<td>discrepancy</td>
+<td>Розбіжності: нестача, зайве, пошкодження, неправильне сортування</td>
+</tr>
+<tr>
+<td>tracking</td>
+<td>tracking_event</td>
+<td>Журнал подій (партиції по місяцях): код події, статус після, точка, час події і запису, джерело, деталі, код UPU EMSEVT</td>
+</tr>
+<tr>
+<td>tracking</td>
+<td>shipment_view</td>
+<td>Проєкція для швидкого читання: статус, прогноз, публічні поля</td>
+</tr>
+<tr>
+<td>tracking</td>
+<td>party_shipment_index</td>
+<td>Хеш телефону → відправлення, напрям (мені / від мене), архів — для дашборда</td>
+</tr>
+<tr>
+<td>tracking</td>
+<td>external_tracking</td>
+<td>Сторонні номери клієнта з підписом і ручним статусом</td>
+</tr>
+<tr>
+<td>payment</td>
+<td>payment, refund</td>
+<td>Платіж: предмет оплати, платник, сума, спосіб, статус, ключ ідемпотентності, посилання провайдера</td>
+</tr>
+<tr>
+<td>payment</td>
+<td>cod, payout</td>
+<td>Післяплата: зібрано, виплачено; пакетні виплати отримувачам</td>
+</tr>
+<tr>
+<td>payment</td>
+<td>ledger_entry</td>
+<td>Подвійний запис: рахунок, дебет, кредит, посилання на операцію</td>
+</tr>
+<tr>
+<td>payment</td>
+<td>bonus_account, bonus_transaction</td>
+<td>Баланс балів; нарахування, списання, згорання</td>
+</tr>
+<tr>
+<td>payment</td>
+<td>invoice</td>
+<td>Місячні рахунки для бізнесу</td>
+</tr>
+<tr>
+<td>notification</td>
+<td>template, notification</td>
+<td>Шаблони за каналом і мовою; журнал відправок зі статусом</td>
+</tr>
+<tr>
+<td>care</td>
+<td>claim, claim_attachment</td>
+<td>Претензії: тип, суми заявлена й погоджена, статус, виконавець; фото в MinIO</td>
+</tr>
+<tr>
+<td>care</td>
+<td>ticket, ticket_message</td>
+<td>Тікети підтримки і повідомлення в них</td>
+</tr>
+<tr>
+<td>audit</td>
+<td>audit_record</td>
+<td>Хто, яка роль, яка дія, над чим, чи був доступ до персональних даних, IP, час</td>
+</tr>
+<tr>
+<td>scan</td>
+<td>scanner_device</td>
+<td>Телефон або стаціонарний сканер-заглушка: точка, спарений користувач, останній зв'язок</td>
+</tr>
+<tr>
+<td>scan</td>
+<td>scan</td>
+<td>Скан: id від клієнта (для ідемпотентності), штрих-код, тип операції, точка, пристрій, час, результат, код попередження</td>
+</tr>
+<tr>
+<td>locker</td>
+<td>locker, cell</td>
+<td>Поштомат і комірки: код, розмір S/M/L, доступна зона, стан, version</td>
+</tr>
+<tr>
+<td>locker</td>
+<td>cell_assignment, storage_booking</td>
+<td>Закріплення комірки за відправленням або камерою зберігання: хеш коду, термін, відкрито / закрито</td>
+</tr>
+<tr>
+<td>ai</td>
+<td>eta_prediction, risk_score, model_registry</td>
+<td>Прогнози з інтервалом, оцінки ризику з причинами, версії моделей</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s6-3">6.3 Ключові індекси та обмеження</h3>
+<ul>
+<li><code>shipment(tracking_number)</code> унікальний; <code>parcel(barcode)</code> унікальний.</li>
+<li><code>tracking_event(shipment_id, occurred_at)</code> — для таймлайну; партиціювання за <code>occurred_at</code>.</li>
+<li><code>party_shipment_index(phone_hash, direction, archived)</code> — для дашборда «мені / від мене».</li>
+<li><code>location</code> — GiST-індекс по <code>geom</code> для пошуку найближчих точок; <code>scan(location_id, scanned_at)</code>.</li>
+<li><code>cell</code> — частковий індекс за станом <code>FREE</code> і розміром для швидкого резервування.</li>
+<li><code>payment(idempotency_key)</code> унікальний; <code>customer_phone(phone)</code> унікальний.</li>
+</ul>
+</section>
+<section aria-labelledby="s7" class="doc-sec"><h2 id="s7"><span class="h2-num">07</span><span class="h2-text">Стейт-машина посилки</span></h2>
+<p>Статус має кожне місце (parcel) окремо, а статус відправлення — це статус найменш просунутого місця плюс прапорець «частково видано». Переходи виконує тільки shipment-service (Spring State Machine або власний табличний автомат); будь-який недозволений перехід відхиляється і пишеться в журнал як попередження.</p>
+<figure class="dia-wrap"><div class="dia-scroll"><svg aria-label="Основний шлях посилки йде по центру, винятки — збоку" class="dia" font-family="var(--f-body)" font-size="13" role="img" viewbox="0 0 760 614"><defs><marker id="sm-arrow" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="9" refy="5" viewbox="0 0 10 10"><path d="M0 0L10 5L0 10z" fill="var(--d-edge)"></path></marker></defs><text fill="var(--d-ink)" font-size="15" font-weight="600" x="24" y="28">Основний шлях посилки йде по центру, винятки — збоку</text><text fill="var(--d-quiet)" font-size="11.5" x="24" y="46">Тоновані — кінцеві стани; умови і номери переходів — у таблиці 7.2</text><g fill="none" stroke="var(--d-edge)" stroke-width="1.25"><path d="M380 100V130" marker-end="url(#sm-arrow)"></path><path d="M380 170V200" marker-end="url(#sm-arrow)"></path><path d="M380 240V270" marker-end="url(#sm-arrow)"></path><path d="M305 150H225" marker-end="url(#sm-arrow)"></path><path d="M455 290H535" marker-end="url(#sm-arrow)"></path><path d="M610 310V340" marker-end="url(#sm-arrow)"></path><path d="M535 360H420V310" marker-end="url(#sm-arrow)"></path><path d="M380 310V410" marker-end="url(#sm-arrow)"></path><path d="M305 290H150V340" marker-end="url(#sm-arrow)"></path><path d="M150 380V480" marker-end="url(#sm-arrow)"></path><path d="M225 500H330V450" marker-end="url(#sm-arrow)"></path><path d="M75 360H40V570H305" marker-end="url(#sm-arrow)"></path><path d="M610 380V410" marker-end="url(#sm-arrow)"></path><path d="M535 424H455" marker-end="url(#sm-arrow)"></path><path d="M455 440H500V570H535" marker-end="url(#sm-arrow)"></path><path d="M610 176V270" marker-end="url(#sm-arrow)"></path></g><g><path d="M380 450V550" fill="none" marker-end="url(#sm-arrow-accent)" stroke="var(--d-accent)" stroke-width="2"></path><defs><marker id="sm-arrow-accent" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="9" refy="5" viewbox="0 0 10 10"><path d="M0 0L10 5L0 10z" fill="var(--d-accent)"></path></marker></defs></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="305" y="60"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="380" y="84">DRAFT</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="305" y="130"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="380" y="154">CREATED</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="305" y="200"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="380" y="224">ACCEPTED</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="305" y="270"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="380" y="294">IN_TRANSIT</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="305" y="410"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="380" y="434">READY_FOR_PICKUP</text></g><g><rect fill="var(--d-accent)" fill-opacity="0.12" height="40" rx="8" stroke="var(--d-accent)" stroke-width="2" width="150" x="305" y="550"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="380" y="574">DELIVERED</text></g><g><rect fill="var(--d-tint)" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="75" y="130"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="150" y="154">CANCELLED</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="75" y="340"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="150" y="364">OUT_FOR_DELIVERY</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="75" y="480"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="150" y="504">DELIVERY_FAILED</text></g><g><rect fill="none" fill-opacity="1" height="52" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="535" y="124"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="610" y="146">LOST</text><text fill="var(--d-quiet)" font-size="11.5" text-anchor="middle" x="610" y="164">з будь-якого транзиту</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="535" y="270"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="610" y="294">AT_HUB</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="535" y="340"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="610" y="364">SORTED</text></g><g><rect fill="none" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="535" y="410"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="610" y="434">ON_HOLD</text></g><g><rect fill="var(--d-tint)" fill-opacity="1" height="40" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="150" x="535" y="550"></rect><text fill="var(--d-ink)" font-weight="600" text-anchor="middle" x="610" y="574">RETURNED</text></g><g font-size="11.5"><text fill="var(--d-quiet)" x="388" y="119">підтвердження</text><text fill="var(--d-quiet)" x="388" y="189">прийом</text><text fill="var(--d-quiet)" x="388" y="259">у рейс</text><text fill="var(--d-quiet)" text-anchor="middle" x="265" y="142">скасування</text><text fill="var(--d-quiet)" text-anchor="middle" x="495" y="282">у хаб</text><text fill="var(--d-quiet)" x="618" y="330">у мішок</text><text fill="var(--d-quiet)" text-anchor="middle" x="478" y="378">наступний рейс</text><text fill="var(--d-quiet)" text-anchor="end" x="372" y="372">у точці призначення</text><text fill="var(--d-quiet)" text-anchor="middle" x="228" y="282">доставка на адресу</text><text fill="var(--d-quiet)" x="158" y="446">не вдалося</text><text fill="var(--d-quiet)" x="232" y="492">у відділення</text><text fill="var(--d-quiet)" text-anchor="middle" x="172" y="562">видано на адресі</text><text fill="var(--d-quiet)" x="618" y="400">відпустка</text><text fill="var(--d-quiet)" text-anchor="middle" x="495" y="416">після дати</text><text fill="var(--d-quiet)" x="508" y="510">відмова або 14 діб</text><text fill="var(--d-ink)" font-weight="600" x="388" y="505">видача</text><text fill="var(--d-quiet)" x="618" y="226">знайдено</text></g></svg></div><figcaption>стейт-машина посилки · 14 станів</figcaption></figure>
+<p>Від прийому до видачі посилка йде центральною колонкою; цикл «хаб → мішок → наступний рейс» повторюється стільки разів, скільки хабів на маршруті.</p>
+<h3 id="s7-1">7.1 Стани</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Стан</th>
+<th>Що означає</th>
+<th>Видно клієнту як</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DRAFT</td>
+<td>Чернетка, не підтверджена</td>
+<td>«Чернетка»</td>
+</tr>
+<tr>
+<td>CREATED</td>
+<td>Накладну створено, чекає на прийом; можлива оплата онлайн</td>
+<td>«Створено, віднесіть у відділення або Kite Box»</td>
+</tr>
+<tr>
+<td>CANCELLED</td>
+<td>Скасовано відправником до прийому (кінцевий)</td>
+<td>«Скасовано»</td>
+</tr>
+<tr>
+<td>ACCEPTED</td>
+<td>Прийнято у відділенні чи Kite Box</td>
+<td>«Прийнято»</td>
+</tr>
+<tr>
+<td>IN_TRANSIT</td>
+<td>У машині між точками</td>
+<td>«Їде до {місто}»</td>
+</tr>
+<tr>
+<td>AT_HUB</td>
+<td>Розвантажено в хабі, ще не відсортовано</td>
+<td>«У сортувальному центрі {місто}»</td>
+</tr>
+<tr>
+<td>SORTED</td>
+<td>Відсортовано, лежить у мішку на лінії</td>
+<td>«Готується до відправки»</td>
+</tr>
+<tr>
+<td>ON_HOLD</td>
+<td>Утримання: «відпустка» клієнта або інцидент</td>
+<td>«Утримується до {дата}»</td>
+</tr>
+<tr>
+<td>READY_FOR_PICKUP</td>
+<td>У відділенні чи комірці Kite Box, можна забрати</td>
+<td>«Можна забирати»</td>
+</tr>
+<tr>
+<td>OUT_FOR_DELIVERY</td>
+<td>Передано кур'єру для доставки на адресу</td>
+<td>«Кур'єр везе посилку»</td>
+</tr>
+<tr>
+<td>DELIVERY_FAILED</td>
+<td>Невдала спроба на адресі (тимчасовий)</td>
+<td>«Не вдалося доставити»</td>
+</tr>
+<tr>
+<td>DELIVERED</td>
+<td>Видано отримувачу (кінцевий)</td>
+<td>«Отримано»</td>
+</tr>
+<tr>
+<td>RETURNED</td>
+<td>Створено повернення; далі живе повернення (кінцевий для оригіналу)</td>
+<td>«Повертається відправнику»</td>
+</tr>
+<tr>
+<td>LOST</td>
+<td>Втрачено, підтверджено диспетчером</td>
+<td>«Шукаємо посилку»</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s7-2">7.2 Переходи</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Звідки</th>
+<th>Тригер</th>
+<th>Куди</th>
+<th>Хто ініціює</th>
+<th>Умова</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="id-cell">T1</td>
+<td>DRAFT</td>
+<td>Підтвердити</td>
+<td>CREATED</td>
+<td>Клієнт, бізнес</td>
+<td>Пройшла валідація, є ціна</td>
+</tr>
+<tr>
+<td class="id-cell">T2</td>
+<td>DRAFT, CREATED</td>
+<td>Скасувати</td>
+<td>CANCELLED</td>
+<td>Відправник</td>
+<td>Ще не прийнято; онлайн-оплата повертається</td>
+</tr>
+<tr>
+<td class="id-cell">T3</td>
+<td>CREATED</td>
+<td>Скан ACCEPT у відділенні або закриття комірки Kite Box</td>
+<td>ACCEPTED</td>
+<td>Оператор, Kite Box</td>
+<td>Оплачено або платить отримувач чи бізнес</td>
+</tr>
+<tr>
+<td class="id-cell">T4</td>
+<td>ACCEPTED, SORTED</td>
+<td>Скан LOAD у рейс</td>
+<td>IN_TRANSIT</td>
+<td>Оператор, сортувальник, водій</td>
+<td>Рейс у статусі «завантаження»</td>
+</tr>
+<tr>
+<td class="id-cell">T5</td>
+<td>IN_TRANSIT</td>
+<td>Скан UNLOAD у хабі</td>
+<td>AT_HUB</td>
+<td>Сортувальник</td>
+<td>—</td>
+</tr>
+<tr>
+<td class="id-cell">T6</td>
+<td>AT_HUB</td>
+<td>Скан SORT (додано в мішок)</td>
+<td>SORTED</td>
+<td>Сортувальник</td>
+<td>Мішок веде у правильному напрямку, інакше попередження MISSORT</td>
+</tr>
+<tr>
+<td class="id-cell">T7</td>
+<td>IN_TRANSIT</td>
+<td>Скан UNLOAD у точці призначення</td>
+<td>READY_FOR_PICKUP</td>
+<td>Оператор, Kite Box</td>
+<td>Точка = поточне призначення; старт таймера зберігання</td>
+</tr>
+<tr>
+<td class="id-cell">T8</td>
+<td>IN_TRANSIT</td>
+<td>Скан UNLOAD у відділенні при доставці на адресу</td>
+<td>OUT_FOR_DELIVERY</td>
+<td>Оператор → кур'єр</td>
+<td>Є завдання кур'єру на сьогодні</td>
+</tr>
+<tr>
+<td class="id-cell">T9</td>
+<td>OUT_FOR_DELIVERY</td>
+<td>Позначка «не вдалося»</td>
+<td>DELIVERY_FAILED</td>
+<td>Кур'єр</td>
+<td>Причина обов'язкова</td>
+</tr>
+<tr>
+<td class="id-cell">T10</td>
+<td>DELIVERY_FAILED</td>
+<td>Повернення у відділення (автоматично)</td>
+<td>READY_FOR_PICKUP</td>
+<td>Система</td>
+<td>Отримувачу пропонують забрати або переадресувати</td>
+</tr>
+<tr>
+<td class="id-cell">T11</td>
+<td>READY_FOR_PICKUP, OUT_FOR_DELIVERY</td>
+<td>Видача</td>
+<td>DELIVERED</td>
+<td>Оператор, Kite Box, кур'єр</td>
+<td>Перевірено код видачі; післяплату сплачено</td>
+</tr>
+<tr>
+<td class="id-cell">T12</td>
+<td>Будь-який до READY_FOR_PICKUP</td>
+<td>Переадресація</td>
+<td>(той самий стан)</td>
+<td>Отримувач, підтримка</td>
+<td>Маршрут перераховано; подія REDIRECTED; безкоштовно</td>
+</tr>
+<tr>
+<td class="id-cell">T13</td>
+<td>READY_FOR_PICKUP</td>
+<td>Переадресація після прибуття</td>
+<td>IN_TRANSIT</td>
+<td>Отримувач</td>
+<td>Оплачено 50 грн</td>
+</tr>
+<tr>
+<td class="id-cell">T14</td>
+<td>CREATED…SORTED</td>
+<td>Запит «відпустки»</td>
+<td>ON_HOLD</td>
+<td>Отримувач</td>
+<td>До 14 днів; посилка доїжджає і чекає в точці</td>
+</tr>
+<tr>
+<td class="id-cell">T15</td>
+<td>ON_HOLD</td>
+<td>Дата настала або клієнт скасував</td>
+<td>READY_FOR_PICKUP</td>
+<td>Система, отримувач</td>
+<td>—</td>
+</tr>
+<tr>
+<td class="id-cell">T16</td>
+<td>READY_FOR_PICKUP (Kite Box)</td>
+<td>Минуло 3 доби (+1, якщо продовжено)</td>
+<td>IN_TRANSIT</td>
+<td>Система</td>
+<td>Посилка їде у найближче відділення</td>
+</tr>
+<tr>
+<td class="id-cell">T17</td>
+<td>READY_FOR_PICKUP</td>
+<td>Відмова отримувача або 14 днів зберігання</td>
+<td>RETURNED</td>
+<td>Отримувач, система</td>
+<td>Створюється пов'язане відправлення-повернення</td>
+</tr>
+<tr>
+<td class="id-cell">T18</td>
+<td>Будь-який транзитний</td>
+<td>Немає сканів понад 7 діб і диспетчер підтвердив</td>
+<td>LOST</td>
+<td>Диспетчер</td>
+<td>Автоматично відкривається претензія</td>
+</tr>
+<tr>
+<td class="id-cell">T19</td>
+<td>LOST</td>
+<td>Скан знайденої посилки</td>
+<td>AT_HUB</td>
+<td>Сортувальник</td>
+<td>Подія FOUND, претензію призупинено</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s7-3">7.3 Таймери</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Таймер</th>
+<th>Старт</th>
+<th>Тривалість</th>
+<th>Що відбувається</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Безкоштовне зберігання у відділенні</td>
+<td class="id-cell">T7</td>
+<td>5 діб</td>
+<td>Далі — платне зберігання, нагадування за добу до кінця</td>
+</tr>
+<tr>
+<td>Зберігання в Kite Box</td>
+<td>T7 у поштоматі</td>
+<td>3 доби, +24 год один раз</td>
+<td>T16 — переміщення у відділення</td>
+</tr>
+<tr>
+<td>Автоповернення</td>
+<td class="id-cell">T7</td>
+<td>14 діб</td>
+<td class="id-cell">T17</td>
+</tr>
+<tr>
+<td>Норматив без сканів</td>
+<td>Кожен скан</td>
+<td>За маршрутом (за замовчуванням 48 год)</td>
+<td>Інцидент для диспетчера; через 7 діб — кандидат у LOST</td>
+</tr>
+<tr>
+<td>Неприйнята накладна</td>
+<td class="id-cell">T1</td>
+<td>30 діб</td>
+<td>Автоматичне скасування (T2)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Таймери — це записи в таблиці <code>scheduled_job</code> shipment-service, які обробляє планувальник (ShedLock, щоб не дублювався між екземплярами).</p>
+<h3 id="s7-4">7.4 Правила дій клієнта за станом</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Дія</th>
+<th>CREATED</th>
+<th>ACCEPTED…SORTED</th>
+<th>ON_HOLD</th>
+<th>READY_FOR_PICKUP</th>
+<th>DELIVERED</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Скасувати</td>
+<td>Так</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Переадресувати</td>
+<td>Так, безкоштовно</td>
+<td>Так, безкоштовно</td>
+<td>Так</td>
+<td>Так, 50 грн</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Відпустка</td>
+<td>Так</td>
+<td>Так</td>
+<td>Змінити дату</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Інший отримувач</td>
+<td>Так</td>
+<td>Так</td>
+<td>Так</td>
+<td>Так</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Продовжити зберігання</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Відмовитися</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Претензія</td>
+<td>—</td>
+<td>Так (затримка)</td>
+<td>Так</td>
+<td>Так</td>
+<td>Так, 14 днів</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section aria-labelledby="s8" class="doc-sec"><h2 id="s8"><span class="h2-num">08</span><span class="h2-text">Подієва модель відстеження — для обговорення</span></h2>
+<p>Рекомендую гібрид (варіант C): shipment-service тримає поточний стан у таблиці, а tracking-service — незмінний журнал подій, з якого будуються всі проєкції. Це чернетка: остаточне рішення приймемо після окремої розмови, питання — в кінці розділу.</p>
+<h3 id="s8-1">8.1 Варіанти</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Варіант</th>
+<th>Як працює</th>
+<th>Плюси</th>
+<th>Мінуси</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. Стан + журнал</td>
+<td>Статус оновлюється в таблиці, події пишуться окремо як історія</td>
+<td>Найпростіше, зрозуміло будь-кому</td>
+<td>Журнал і стан можуть розійтися; аналітика на «бідних» даних</td>
+</tr>
+<tr>
+<td>B. Повний event sourcing</td>
+<td>Стан відправлення — це згортка всіх його подій (Axon або власна реалізація на Postgres)</td>
+<td>Повна історія, повтор подій, «машина часу»</td>
+<td>Знімки, версіонування подій, складні міграції; багато коду для соло-розробника</td>
+</tr>
+<tr>
+<td>C. Гібрид (рекомендую)</td>
+<td>Стан — у shipment-service, транзакційно разом з outbox; журнал — у tracking-service, незмінний, з нього можна перебудувати будь-яку проєкцію</td>
+<td>Простий запис, повна історія для таймлайну і ML, проєкції перебудовуються</td>
+<td>Два джерела правди для різних питань — треба чітко розділити ролі</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s8-2">8.2 Каталог кодів подій (чернетка)</h3>
+<p>Власні коди Kite з відповідністю стандарту UPU EMSEVT там, де вона існує; внутрішні хабові події стандартного аналога не мають.</p>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Код</th>
+<th>Подія</th>
+<th>Стан після</th>
+<th>UPU EMSEVT</th>
+<th>Видно клієнту</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="id-cell">KT01</td>
+<td>Накладну створено</td>
+<td>CREATED</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT02</td>
+<td>Оплачено онлайн</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT10</td>
+<td>Прийнято у відділенні / Kite Box</td>
+<td>ACCEPTED</td>
+<td>EMA</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT20</td>
+<td>Завантажено в рейс</td>
+<td>IN_TRANSIT</td>
+<td>—</td>
+<td>Так (узагальнено)</td>
+</tr>
+<tr>
+<td class="id-cell">KT21</td>
+<td>Розвантажено в хабі</td>
+<td>AT_HUB</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT22</td>
+<td>Відсортовано, додано в мішок</td>
+<td>SORTED</td>
+<td>—</td>
+<td>Ні</td>
+</tr>
+<tr>
+<td class="id-cell">KT23</td>
+<td>Помилкове сортування виявлено</td>
+<td>—</td>
+<td>—</td>
+<td>Ні</td>
+</tr>
+<tr>
+<td class="id-cell">KT30</td>
+<td>Прибуло у відділення призначення</td>
+<td>READY_FOR_PICKUP</td>
+<td>EMG, EDH</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT31</td>
+<td>Покладено в комірку Kite Box</td>
+<td>READY_FOR_PICKUP</td>
+<td>EDH</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT32</td>
+<td>Утримується (відпустка, інцидент)</td>
+<td>ON_HOLD</td>
+<td>EDF</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT40</td>
+<td>Передано кур'єру</td>
+<td>OUT_FOR_DELIVERY</td>
+<td>EDG</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT41</td>
+<td>Невдала спроба доставки</td>
+<td>DELIVERY_FAILED</td>
+<td>EMH</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT50</td>
+<td>Видано</td>
+<td>DELIVERED</td>
+<td>EMI</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT60</td>
+<td>Переадресовано</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT61</td>
+<td>Змінено отримувача</td>
+<td>—</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT70</td>
+<td>Створено повернення</td>
+<td>RETURNED</td>
+<td>—</td>
+<td>Так</td>
+</tr>
+<tr>
+<td class="id-cell">KT80</td>
+<td>Підозра на втрату / втрачено / знайдено</td>
+<td>LOST, AT_HUB</td>
+<td>—</td>
+<td>Так (м'яко)</td>
+</tr>
+<tr>
+<td class="id-cell">KT90</td>
+<td>Скан анульовано (виправлення)</td>
+<td>Перерахунок</td>
+<td>—</td>
+<td>Ні</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s8-3">8.3 Що треба вирішити разом</h3>
+<ol>
+<li><strong>Варіант зберігання:</strong> A, B чи C — і чи хочеш спробувати event sourcing як навчальну мету (тоді B лише для shipment-service).</li>
+<li><strong>Гранулярність:</strong> скан мішка — це одна подія мішка чи розгортання в події для кожної посилки всередині? Пропоную: одна подія <code>unit.scanned</code> у Kafka, а tracking-service розгортає її в події посилок.</li>
+<li><strong>Пізні й невпорядковані події:</strong> сортуємо за <code>occurred_at</code> (час скану), а не за часом отримання; ключ розділу Kafka — <code>shipment_id</code>, тож порядок у межах відправлення гарантований.</li>
+<li><strong>Виправлення:</strong> нічого не видаляємо — помилковий скан анулюється подією KT90, проєкції перераховуються.</li>
+<li><strong>Сховище журналу:</strong> Postgres з партиціями по місяцях (просто), TimescaleDB (те саме + зручні агрегати) чи ClickHouse для аналітики (ще один контейнер).</li>
+<li><strong>Схеми подій:</strong> JSON Schema (просто, легко читати) чи Avro + реєстр схем Apicurio (суворе версіонування).</li>
+</ol>
+</section>
+<section aria-labelledby="s9" class="doc-sec"><h2 id="s9"><span class="h2-num">09</span><span class="h2-text">API-контракт</span></h2>
+<p>Зовнішній API — REST/JSON за шлюзом під <code>/api/v1</code>, описаний у файлі <code>openapi.yaml</code>; між сервісами — події Kafka у форматі CloudEvents; пристрої — MQTT; живі оновлення — WebSocket. Нижче — правила і повна карта ендпоїнтів; схеми тіл запитів і відповідей — у OpenAPI.</p>
+<h3 id="s9-1">9.1 Загальні правила</h3>
+<ul>
+<li><strong>Автентифікація:</strong> <code>Authorization: Bearer &lt;JWT&gt;</code> для клієнтів і персоналу; <code>X-Api-Key</code> для бізнес-інтеграцій.</li>
+<li><strong>Ідемпотентність:</strong> <code>Idempotency-Key</code> обов'язковий для створення відправлень, платежів і дій з оплатою; повтор з тим самим ключем повертає ту саму відповідь 24 год.</li>
+<li><strong>Помилки:</strong> формат <code>application/problem+json</code> (RFC 9457) з полями <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>code</code> (наприклад <code>SHIPMENT_INVALID_TRANSITION</code>) і <code>errors[]</code> для валідації.</li>
+<li><strong>Пагінація:</strong> курсорна — <code>?limit=20&amp;cursor=…</code>, у відповіді <code>nextCursor</code>.</li>
+<li><strong>Мова:</strong> <code>Accept-Language: uk</code> або <code>en</code> — від неї залежать людські описи статусів.</li>
+<li><strong>Трасування:</strong> <code>X-Request-Id</code> приймається або генерується шлюзом і проходить через усі сервіси й події.</li>
+<li><strong>Конкурентні зміни:</strong> <code>ETag</code> / <code>If-Match</code> для PATCH відправлень і налаштувань.</li>
+<li><strong>Вебхуки бізнесу:</strong> заголовок <code>Kite-Signature: t=&lt;час&gt;,v1=&lt;HMAC-SHA256(secret, t.body)&gt;</code>; повтори з експоненційною паузою до 24 год.</li>
+</ul>
+<h3 id="s9-2">9.2 Публічні та автентифікація</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Метод і шлях</th>
+<th>Призначення</th>
+<th>Доступ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST /api/v1/auth/otp</td>
+<td>Надіслати код на телефон</td>
+<td>Публічно, rate limit</td>
+</tr>
+<tr>
+<td>POST /api/v1/auth/otp/verify</td>
+<td>Перевірити код, отримати токени</td>
+<td>Публічно</td>
+</tr>
+<tr>
+<td>POST /api/v1/auth/refresh</td>
+<td>Оновити токен</td>
+<td>Refresh token</td>
+</tr>
+<tr>
+<td>GET /api/v1/public/track/{trackingNumber}</td>
+<td>Публічний статус без персональних даних</td>
+<td>Публічно</td>
+</tr>
+<tr>
+<td>GET /api/v1/public/locations</td>
+<td>Точки на карті: bbox, тип, послуги, відкрито зараз, вільний розмір комірки</td>
+<td>Публічно</td>
+</tr>
+<tr>
+<td>GET /api/v1/public/locations/{id}</td>
+<td>Картка точки</td>
+<td>Публічно</td>
+</tr>
+<tr>
+<td>POST /api/v1/public/quotes</td>
+<td>Калькулятор вартості</td>
+<td>Публічно</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s9-3">9.3 Клієнт</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Метод і шлях</th>
+<th>Призначення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET, PATCH /api/v1/me</td>
+<td>Профіль, мова, тема, тиха година</td>
+</tr>
+<tr>
+<td>GET, POST /api/v1/me/phones; POST …/{id}/verify; POST …/{id}/activate; DELETE …/{id}</td>
+<td>Мультиномер</td>
+</tr>
+<tr>
+<td>GET, POST, DELETE /api/v1/me/trusted-persons</td>
+<td>Довірені особи</td>
+</tr>
+<tr>
+<td>GET, POST, PATCH, DELETE /api/v1/me/addresses</td>
+<td>Збережені адреси</td>
+</tr>
+<tr>
+<td>GET, PUT /api/v1/me/notification-preferences</td>
+<td>Налаштування сповіщень</td>
+</tr>
+<tr>
+<td>POST, DELETE /api/v1/me/push-subscriptions</td>
+<td>Підписка web push або ntfy</td>
+</tr>
+<tr>
+<td>POST /api/v1/shipments</td>
+<td>Створити чернетку або одразу підтверджене відправлення</td>
+</tr>
+<tr>
+<td>GET /api/v1/shipments?direction=incoming|outgoing|archive</td>
+<td>Дашборд «мені / від мене / архів»</td>
+</tr>
+<tr>
+<td>GET, PATCH /api/v1/shipments/{id}</td>
+<td>Деталі; зміна чернетки</td>
+</tr>
+<tr>
+<td>POST /api/v1/shipments/{id}/confirm</td>
+<td>DRAFT → CREATED</td>
+</tr>
+<tr>
+<td>POST /api/v1/shipments/{id}/cancel</td>
+<td>Скасування до прийому</td>
+</tr>
+<tr>
+<td>GET /api/v1/shipments/{id}/qr</td>
+<td>QR для відправки без етикетки (SVG)</td>
+</tr>
+<tr>
+<td>GET /api/v1/shipments/{id}/timeline</td>
+<td>Таймлайн подій і прогноз</td>
+</tr>
+<tr>
+<td>GET /api/v1/shipments/{id}/actions</td>
+<td>Доступні дії з цінами для поточного стану</td>
+</tr>
+<tr>
+<td>POST /api/v1/shipments/{id}/actions/{redirect|hold|change-recipient|extend-storage|refuse}</td>
+<td>Керування доставкою</td>
+</tr>
+<tr>
+<td>POST /api/v1/payments; GET /api/v1/payments/{id}</td>
+<td>Оплата: повертає <code>redirectUrl</code> на сторінку mock-pay</td>
+</tr>
+<tr>
+<td>POST /api/v1/lockers/{locationId}/open</td>
+<td>Відкрити комірку (отримання або відправка)</td>
+</tr>
+<tr>
+<td>POST, GET /api/v1/storage-bookings</td>
+<td>Камера зберігання в Kite Box</td>
+</tr>
+<tr>
+<td>GET, POST, DELETE /api/v1/me/external-tracking</td>
+<td>Сторонні номери</td>
+</tr>
+<tr>
+<td>POST, GET /api/v1/claims; POST /api/v1/claims/{id}/attachments</td>
+<td>Претензії; посилання для завантаження фото</td>
+</tr>
+<tr>
+<td>GET /api/v1/me/bonuses; POST /api/v1/promo-codes/validate</td>
+<td>Бали і промокоди</td>
+</tr>
+<tr>
+<td>GET, POST /api/v1/tickets; POST /api/v1/tickets/{id}/messages</td>
+<td>Підтримка</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s9-4">9.4 Kite Business</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Метод і шлях</th>
+<th>Призначення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET, PATCH /api/v1/business/org</td>
+<td>Організація, реквізити, план</td>
+</tr>
+<tr>
+<td>GET, POST, PATCH, DELETE /api/v1/business/members</td>
+<td>Учасники і ролі</td>
+</tr>
+<tr>
+<td>GET, POST, DELETE /api/v1/business/api-keys</td>
+<td>Ключі API</td>
+</tr>
+<tr>
+<td>GET, POST, PATCH, DELETE /api/v1/business/webhooks; POST …/{id}/test</td>
+<td>Вебхуки</td>
+</tr>
+<tr>
+<td>POST /api/v1/business/imports; GET …/{id}; GET …/{id}/report</td>
+<td>Імпорт CSV і звіт про помилки</td>
+</tr>
+<tr>
+<td>POST, GET /api/v1/business/registries; GET …/{id}/pdf</td>
+<td>Реєстри приймання-передачі</td>
+</tr>
+<tr>
+<td>GET /api/v1/business/invoices; GET /api/v1/business/cod-payouts</td>
+<td>Рахунки і виплати післяплати</td>
+</tr>
+<tr>
+<td>GET /api/v1/business/analytics</td>
+<td>Зведення за період</td>
+</tr>
+<tr>
+<td>POST /api/v1/business/returns/settings</td>
+<td>Налаштування легких повернень</td>
+</tr>
+</tbody>
+</table></div>
+<p>Відправлення бізнес створює тим самим <code>POST /api/v1/shipments</code> — з ключем API організації.</p>
+<h3 id="s9-5">9.5 Kite Ops (персонал)</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Метод і шлях</th>
+<th>Призначення</th>
+<th>Роль</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET /api/v1/ops/shipments/search?q=</td>
+<td>Пошук за номером, телефоном, ПІБ</td>
+<td>Оператор, підтримка</td>
+</tr>
+<tr>
+<td>POST /api/v1/ops/acceptances</td>
+<td>Прийом: штрих-код, фактична вага, габарити, оплата на касі</td>
+<td>Оператор</td>
+</tr>
+<tr>
+<td>GET /api/v1/ops/shipments/{id}/label</td>
+<td>Етикетка PDF</td>
+<td>Оператор</td>
+</tr>
+<tr>
+<td>POST /api/v1/ops/handovers</td>
+<td>Видача: код отримувача або довірена особа</td>
+<td>Оператор</td>
+</tr>
+<tr>
+<td>POST /api/v1/scans</td>
+<td>Пакет сканів (до 100)</td>
+<td>Будь-який сканер персоналу</td>
+</tr>
+<tr>
+<td>GET /api/v1/ops/hubs/{hubId}/sort-hint/{barcode}</td>
+<td>Сортувальна підказка</td>
+<td>Сортувальник</td>
+</tr>
+<tr>
+<td>POST /api/v1/ops/units; POST …/{id}/items; POST …/{id}/close; POST …/{id}/open</td>
+<td>Мішки й контейнери</td>
+<td>Сортувальник, оператор</td>
+</tr>
+<tr>
+<td>POST /api/v1/ops/trips; POST …/{id}/{start-loading|depart|arrive}</td>
+<td>Рейси</td>
+<td>Начальник зміни, водій</td>
+</tr>
+<tr>
+<td>GET /api/v1/ops/trips/{id}/manifest; GET …/{id}/reconciliation</td>
+<td>Маніфест і звірка</td>
+<td>Начальник зміни</td>
+</tr>
+<tr>
+<td>GET, PATCH /api/v1/ops/discrepancies</td>
+<td>Розбіжності</td>
+<td>Начальник зміни</td>
+</tr>
+<tr>
+<td>POST /api/v1/ops/scanner-sessions</td>
+<td>Почати пейринг: код і QR для телефону</td>
+<td>Персонал</td>
+</tr>
+<tr>
+<td>POST /api/v1/scanner/pair</td>
+<td>Телефон приєднується до сесії</td>
+<td>Персонал</td>
+</tr>
+<tr>
+<td>CRUD /api/v1/ops/locations, /routing-rules, /sort-lines, /schedules</td>
+<td>Мережа</td>
+<td>Адмін</td>
+</tr>
+<tr>
+<td>CRUD /api/v1/ops/tariffs, /promo-codes</td>
+<td>Тарифи і промокоди</td>
+<td>Адмін</td>
+</tr>
+<tr>
+<td>CRUD /api/v1/ops/users</td>
+<td>Персонал і ролі (фасад над Keycloak)</td>
+<td>Адмін</td>
+</tr>
+<tr>
+<td>GET /api/v1/ops/incidents; GET /api/v1/ops/network/load</td>
+<td>Диспетчерська</td>
+<td>Диспетчер</td>
+</tr>
+<tr>
+<td>GET, PATCH /api/v1/ops/claims; /api/v1/ops/tickets</td>
+<td>Претензії і тікети</td>
+<td>Підтримка</td>
+</tr>
+<tr>
+<td>GET /api/v1/ops/audit</td>
+<td>Журнал дій</td>
+<td>Адмін</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s9-6">9.6 Реальний час і пристрої</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Канал</th>
+<th>Адреса</th>
+<th>Що передає</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WebSocket</td>
+<td>/ws/client</td>
+<td>Оновлення таймлайну і статусів для клієнта</td>
+</tr>
+<tr>
+<td>WebSocket</td>
+<td>/ws/ops</td>
+<td>Скани з телефону, сортувальні підказки, інциденти</td>
+</tr>
+<tr>
+<td>WebSocket</td>
+<td>/ws/scanner</td>
+<td>Телефон-сканер: надсилає скани, отримує підказки й вібро-сигнали</td>
+</tr>
+<tr>
+<td>MQTT</td>
+<td>kite/box/{lockerId}/cmd/open</td>
+<td>Команда відкрити комірку</td>
+</tr>
+<tr>
+<td>MQTT</td>
+<td>kite/box/{lockerId}/evt/door</td>
+<td>Двері відкрито / закрито, датчик заповнення</td>
+</tr>
+<tr>
+<td>MQTT</td>
+<td>kite/scanner/{deviceId}/scan</td>
+<td>Скани зі стаціонарного сканера-заглушки</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s9-7">9.7 Події Kafka</h3>
+<p>Усі події — CloudEvents (<code>id</code>, <code>source</code>, <code>type</code>, <code>time</code>, <code>subject</code>, <code>data</code>), ключ розділу — <code>shipmentId</code>, якщо подія стосується відправлення.</p>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Топік</th>
+<th>Типи подій</th>
+<th>Продюсер</th>
+<th>Споживачі</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shipment.events</td>
+<td>created, confirmed, cancelled, status-changed, redirected, recipient-changed, hold-set, return-created</td>
+<td>shipment-service</td>
+<td>tracking, notification, payment, locker, business (вебхуки), ai, audit</td>
+</tr>
+<tr>
+<td>scan.events</td>
+<td>scan.recorded, unit.scanned, scan.voided</td>
+<td>scan-service</td>
+<td>shipment, logistics, tracking, realtime</td>
+</tr>
+<tr>
+<td>logistics.events</td>
+<td>unit.closed, trip.departed, trip.arrived, discrepancy.opened</td>
+<td>logistics-service</td>
+<td>shipment, tracking, realtime</td>
+</tr>
+<tr>
+<td>locker.events</td>
+<td>cell.reserved, parcel.deposited, parcel.collected, storage.expired</td>
+<td>locker-service</td>
+<td>shipment, tracking, notification</td>
+</tr>
+<tr>
+<td>payment.events</td>
+<td>payment.succeeded, payment.failed, refund.completed, cod.collected, payout.completed</td>
+<td>payment-service</td>
+<td>shipment, notification, business</td>
+</tr>
+<tr>
+<td>customer.events</td>
+<td>phone.verified, phone.removed, trusted-person.changed</td>
+<td>customer-service</td>
+<td>tracking (індекс «мені»), shipment</td>
+</tr>
+<tr>
+<td>ai.events</td>
+<td>eta.predicted, risk.scored</td>
+<td>ai-service</td>
+<td>tracking, notification, shipment</td>
+</tr>
+<tr>
+<td>care.events</td>
+<td>claim.created, claim.resolved, ticket.updated</td>
+<td>care-service</td>
+<td>notification, payment (компенсація)</td>
+</tr>
+<tr>
+<td>audit.events</td>
+<td>staff.action, pii.accessed</td>
+<td>усі сервіси</td>
+<td>audit-service</td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section aria-labelledby="s10" class="doc-sec"><h2 id="s10"><span class="h2-num">10</span><span class="h2-text">Сканування і заглушки</span></h2>
+<p>Телефон персоналу — справжній сканер: камера читає QR і штрих-коди, а сам телефон спарюється з робочим місцем Kite Ops під тим самим акаунтом. Усе, що в реальності було б окремим пристроєм (стаціонарний сканер, ваги, принтер етикеток, поштомат, платіжний провайдер, SMS-шлюз), — емулятори, які поводяться як справжні: мають власний протокол, затримки й помилки.</p>
+<h3 id="s10-1">10.1 Коди</h3>
+<ul>
+<li><strong>Номер відправлення:</strong> формат UPU S10 — <code>KT</code> + 8 цифр + контрольна цифра + <code>UA</code>. Контрольна цифра: ваги 8, 6, 4, 2, 3, 5, 9, 7 до восьми цифр, сума за модулем 11; результат = 11 − залишок, де 10 → 0 і 11 → 5.</li>
+<li><strong>Місце:</strong> номер + суфікс <code>-01…-20</code>; на етикетці — Code 128.</li>
+<li><strong>QR клієнта для відправки без етикетки:</strong> підписаний токен <code>kite://ship/{shipmentId}?t=&lt;JWS, 7 днів&gt;</code> — його не підробити, і він не розкриває персональних даних.</li>
+<li><strong>Мішок, контейнер:</strong> <code>BG</code> / <code>CT</code> + 10 цифр; <strong>рейс:</strong> <code>TR-{дата}-{номер}</code>; <strong>комірка:</strong> <code>{код поштомату}-{A01}</code>.</li>
+<li>Генерація: ZXing (Java) для етикеток PDF і QR, у Flutter — пакет mobile_scanner для читання.</li>
+</ul>
+<h3 id="s10-2">10.2 Пейринг телефону з Kite Ops</h3>
+<ol>
+<li>Працівник у Kite Ops натискає «Підключити сканер» → <code>POST /ops/scanner-sessions</code>. Сесія (id, 6-значний код, діє 2 хв для пейрингу) зберігається в Redis, сторінка підписується на <code>/ws/ops</code>.</li>
+<li>Kite Ops показує QR <code>kite://pair?session=…&amp;code=…</code> і код цифрами для ручного введення.</li>
+<li>Телефон у режимі Kite Scan (увійшов під тим самим користувачем) сканує QR → <code>POST /scanner/pair</code>. realtime-service перевіряє, що користувач той самий і має роль персоналу, і прив'язує пристрій до сесії. Обидва екрани показують «Сканер підключено».</li>
+<li>Режим роботи вибирається в Kite Ops: Прийом, Розвантаження, Сортування, Наповнення мішка, Завантаження в рейс, Видача. Контекст (поточний мішок, рейс, клієнт біля каси) живе в сесії, тож телефон лише сканує.</li>
+<li>Кожен скан іде з телефону через <code>/ws/scanner</code> з <code>scanId</code> (UUID, згенерований на телефоні — для ідемпотентності) → realtime-service → scan-service. Результат за &lt; 1 с повертається на обидва екрани.</li>
+<li>Зворотний зв'язок на телефоні: одна коротка вібрація — гаразд, дві — попередження (наприклад, «не той хаб»), довга — помилка. На екрані Kite Ops — рядок у списку, звук і сортувальна підказка великим шрифтом («Лінія 7 → Львів»).</li>
+<li>Сесія живе до виходу або кінця зміни (12 год), пульс кожні 15 с; після обриву телефон перепідключається до тієї ж сесії. Одна сесія — один телефон; спарити телефон із сесією іншого користувача неможливо.</li>
+</ol>
+<p>Запасні шляхи: ручне введення коду на телефоні та поле введення на сторінці Kite Ops, яке приймає «клавіатурний» USB-сканер (вводить код і Enter).</p>
+<h3 id="s10-3">10.3 Емулятори пристроїв і сервісів</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Емулятор</th>
+<th>Що імітує</th>
+<th>Як влаштований</th>
+<th>Що можна налаштувати</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Стаціонарний сканер</td>
+<td>Сканер на сортувальній лінії</td>
+<td>Маленький Go-CLI і веб-панель: вибір посилок зі списку очікуваних, надсилання в MQTT <code>kite/scanner/{id}/scan</code></td>
+<td>Затримка, частка нечитаних кодів, дублі</td>
+</tr>
+<tr>
+<td>Ваги</td>
+<td>Ваги на касі відділення</td>
+<td>Поле в Kite Ops із «віртуальними вагами»: заявлена вага ± випадкове відхилення</td>
+<td>Відхилення у %</td>
+</tr>
+<tr>
+<td>Принтер етикеток</td>
+<td>Термопринтер 100×150 мм</td>
+<td>PDF етикетки з MinIO, друк через браузер</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Kite Box</td>
+<td>Поштомат</td>
+<td>locker-service (стан комірок, MQTT-команди) + kite-box-screen (сенсорний екран у браузері з анімацією дверцят)</td>
+<td>Кількість і розміри комірок, несправна комірка, «двері не закрили»</td>
+</tr>
+<tr>
+<td>mock-pay</td>
+<td>Платіжний провайдер</td>
+<td>Сторінка оплати картою, екран 3-D Secure, вебхук у payment-service</td>
+<td>Тестові картки: успіх, відмова, 3-D Secure, таймаут, затримка вебхука</td>
+</tr>
+<tr>
+<td>sms-gateway-emu</td>
+<td>SMS-шлюз</td>
+<td>HTTP API як у справжнього шлюзу + веб-інтерфейс «телефону» зі списком повідомлень за номером</td>
+<td>Затримка доставки, частка недоставлених</td>
+</tr>
+<tr>
+<td>Mailpit</td>
+<td>Поштовий сервер</td>
+<td>Ловить усі листи, показує їх у вебі як справжню скриньку</td>
+<td>—</td>
+</tr>
+<tr>
+<td>ntfy</td>
+<td>Мобільний push</td>
+<td>Самостійно розгорнутий сервер; застосунок підписується на свій топік</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Обмеження push: на Android ntfy працює без Firebase; на iOS фонові push неможливі без Apple Push Notification service, тож для iOS — сповіщення, поки застосунок відкритий, або опційно Firebase Cloud Messaging (безкоштовний, але хмарний).</p>
+</section>
+<section aria-labelledby="s11" class="doc-sec"><h2 id="s11"><span class="h2-num">11</span><span class="h2-text">AI-фічі</span></h2>
+<p>У MVP — дві ML-моделі на даних мережі: прогноз дати доставки (AI-2) і ризик невдалого отримання (AI-3). У v2 — один vision-конвеєр для «фото → накладна» (AI-1) та оцінки пошкоджень (AI-5), потім асистент Kit (AI-6). Усе живе в ai-service (Python, FastAPI); рішення про гроші й статуси AI тільки пропонує, а приймає людина або правило.</p>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Фіча</th>
+<th>Етап</th>
+<th>Модель</th>
+<th>Результат для користувача</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="id-cell">AI-2</td>
+<td>Прогноз дати доставки</td>
+<td>MVP</td>
+<td>LightGBM, квантильна регресія</td>
+<td>Дата і вікно «8–9 листопада», оновлюється з кожним сканом</td>
+</tr>
+<tr>
+<td class="id-cell">AI-3</td>
+<td>Ризик невдалого отримання</td>
+<td>MVP</td>
+<td>LightGBM-класифікатор + пояснення факторів</td>
+<td>Проактивна пропозиція: Kite Box, відпустка, інша точка; бізнесу — позначка ризикових замовлень</td>
+</tr>
+<tr>
+<td class="id-cell">AI-1</td>
+<td>Фото → накладна</td>
+<td>v2</td>
+<td>Vision-LLM зі структурованою відповіддю</td>
+<td>Категорія, опис, оцінка габаритів і ваги, розмір коробки й комірки, перевірка заборонених вкладень</td>
+</tr>
+<tr>
+<td class="id-cell">AI-5</td>
+<td>Оцінка пошкодження</td>
+<td>v2</td>
+<td>Той самий vision-конвеєр</td>
+<td>Тип і ступінь пошкодження, підказка оператору претензій</td>
+</tr>
+<tr>
+<td class="id-cell">AI-6</td>
+<td>Асистент Kit</td>
+<td>v2</td>
+<td>LLM з викликом функцій Kite API</td>
+<td>«Де моя посилка?», «Переадресуй у Kite Box біля дому» з підтвердженням</td>
+</tr>
+<tr>
+<td class="id-cell">AI-8</td>
+<td>Маршрут кур'єра</td>
+<td>v3</td>
+<td>OR-Tools, маршрутизація з часовими вікнами</td>
+<td>Порядок адрес на день</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s11-1">11.1 AI-2: прогноз дати доставки</h3>
+<ul>
+<li><strong>Проблема старту:</strong> на початку історії немає. До накопичення даних прогноз дає правило (норматив маршруту з розкладу рейсів), а модель вчиться на даних симулятора і замінює правило, коли її похибка стає меншою.</li>
+<li><strong>Ознаки:</strong> звідки й куди (хаби, кількість переходів), поточний стан і точка, час від останнього скану, день тижня й година, найближчий рейс за розкладом, завантаження хабу, тип і вага, вихідні та свята.</li>
+<li><strong>Ціль:</strong> години до видачі; модель дає 10-й, 50-й і 90-й перцентилі, з них — дата і вікно.</li>
+<li><strong>Обслуговування:</strong> ai-service слухає <code>shipment.events</code> і <code>scan.events</code>, перераховує прогноз і публікує <code>eta.predicted</code>, лише якщо змінився день або вікно зсунулося більш ніж на 6 год.</li>
+<li><strong>Навчання:</strong> щоночі; версії моделей — у <code>model_registry</code>, файли — у MinIO. Метрики: середня похибка в годинах і частка посилок, що прийшли в прогнозований день.</li>
+</ul>
+<h3 id="s11-2">11.2 AI-3: ризик невдалого отримання</h3>
+<ul>
+<li><strong>Що прогнозуємо:</strong> імовірність, що посилку не заберуть за термін зберігання, відмовляться від неї або не вдасться доставити на адресу.</li>
+<li><strong>Ознаки:</strong> історія отримувача (як швидко забирає, відмови), сума післяплати, тип точки і заповненість Kite Box, прибуття на вихідні, переадресації, відстань від збереженої адреси до точки.</li>
+<li><strong>Пояснення:</strong> топ-3 фактори (SHAP) зберігаються разом з оцінкою — підтримка і бізнес бачать, чому посилка ризикова.</li>
+<li><strong>Дії:</strong> при оцінці &gt; 0,6 — сповіщення з пропозицією зручнішої точки або відпустки; у Kite Business — позначка на замовленні.</li>
+</ul>
+<h3 id="s11-3">11.3 AI-1 і AI-5: vision-конвеєр (v2)</h3>
+<ol>
+<li>Клієнт фотографує предмет (бажано поруч з аркушем A4 або банківською карткою для масштабу).</li>
+<li>ai-service надсилає фото у vision-LLM з JSON-схемою відповіді: категорія, опис, діапазон габаритів і ваги, впевненість, прапорці заборонених вкладень.</li>
+<li>Застосунок підставляє значення в майстер створення; клієнт перевіряє і змінює будь-яке поле. Оператор при прийомі все одно зважує й міряє.</li>
+<li>Для претензій той самий конвеєр оцінює тип пошкодження (зім'ято, розірвано, намокло) і ступінь, а оператор претензій бачить це як підказку, не як рішення.</li>
+</ol>
+<p>Постачальник LLM — за абстракцією: хмарний API з підтримкою зображень (наприклад, Claude) або локальна відкрита модель через Ollama, якщо потрібно, щоб усе працювало без інтернету.</p>
+<h3 id="s11-4">11.4 AI-6: асистент Kit (v2)</h3>
+<p>Асистент працює від імені користувача з тим самим обмеженим токеном, тож бачить лише його відправлення. Інструменти: знайти відправлення, отримати таймлайн, порахувати вартість, запропонувати переадресацію, створити чернетку претензії. Платні й незворотні дії він тільки готує, а виконуються вони після натискання кнопки «Підтвердити» в інтерфейсі.</p>
+</section>
+<section aria-labelledby="s12" class="doc-sec"><h2 id="s12"><span class="h2-num">12</span><span class="h2-text">Інфраструктура і локальний деплой</span></h2>
+<p>Увесь стенд піднімається <code>docker compose --profile &lt;профіль&gt; up</code> з одного файлу з трьома профілями, щоб не тримати все запущеним одночасно. Повний стенд з'їдає орієнтовно 10–12 ГБ RAM, тому під час розробки сервіс, який правиш, запускаєш з IDE, а решту — в Docker.</p>
+<h3 id="s12-1">12.1 Профілі</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Профіль</th>
+<th>Що входить</th>
+<th>RAM (оцінка)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>core</td>
+<td>Postgres, Redis, Kafka, Mosquitto, MinIO, Keycloak, gateway, customer, shipment, pricing, network, logistics, tracking, payment, notification, scan, realtime, locker, mock-pay, sms-emu, Mailpit, ntfy, тайли, kite-web, kite-ops, kite-box-screen</td>
+<td>\~7 ГБ</td>
+</tr>
+<tr>
+<td>full</td>
+<td>core + business, care, audit, ai-service, kite-business, Photon, Kafka UI</td>
+<td>\~10 ГБ</td>
+</tr>
+<tr>
+<td>obs</td>
+<td>OpenTelemetry Collector, Prometheus, Loki, Tempo, Grafana</td>
+<td>\~1,5 ГБ</td>
+</tr>
+</tbody>
+</table></div>
+<p>Для Java-сервісів у контейнерах: <code>-XX:MaxRAMPercentage=75</code>, ліміт пам'яті 384 МБ, Spring Boot з AppCDS для швидшого старту. Пізніше можна спробувати збірку GraalVM native для найлегших сервісів.</p>
+<h3 id="s12-2">12.2 Порти</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Сервіс</th>
+<th>Порт</th>
+<th>Адреса</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>api-gateway</td>
+<td>8080</td>
+<td>http://localhost:8080/api/v1</td>
+</tr>
+<tr>
+<td>Keycloak</td>
+<td>8081</td>
+<td>http://localhost:8081 (realm <code>kite</code>)</td>
+</tr>
+<tr>
+<td>kite-web</td>
+<td>3000</td>
+<td>http://localhost:3000</td>
+</tr>
+<tr>
+<td>kite-business</td>
+<td>3001</td>
+<td>http://localhost:3001</td>
+</tr>
+<tr>
+<td>kite-ops</td>
+<td>3002</td>
+<td>http://localhost:3002</td>
+</tr>
+<tr>
+<td>kite-box-screen</td>
+<td>3003</td>
+<td>http://localhost:3003/box/{код}</td>
+</tr>
+<tr>
+<td>Тайли (nginx + PMTiles)</td>
+<td>8090</td>
+<td>http://localhost:8090/ukraine.pmtiles</td>
+</tr>
+<tr>
+<td>Photon</td>
+<td>2322</td>
+<td>http://localhost:2322/api</td>
+</tr>
+<tr>
+<td>Kafka / Kafka UI</td>
+<td>9092 / 8085</td>
+<td>http://localhost:8085</td>
+</tr>
+<tr>
+<td>Mosquitto</td>
+<td>1883 / 9883</td>
+<td>MQTT / MQTT через WebSocket</td>
+</tr>
+<tr>
+<td>PostgreSQL</td>
+<td>5432</td>
+<td>бази за назвами сервісів</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>6379</td>
+<td>—</td>
+</tr>
+<tr>
+<td>MinIO</td>
+<td>9000 / 9002</td>
+<td>API / консоль</td>
+</tr>
+<tr>
+<td>Mailpit</td>
+<td>8025</td>
+<td>http://localhost:8025</td>
+</tr>
+<tr>
+<td>ntfy</td>
+<td>8086</td>
+<td>http://localhost:8086</td>
+</tr>
+<tr>
+<td>mock-pay</td>
+<td>8087</td>
+<td>http://localhost:8087</td>
+</tr>
+<tr>
+<td>sms-gateway-emu</td>
+<td>8088</td>
+<td>http://localhost:8088</td>
+</tr>
+<tr>
+<td>Grafana</td>
+<td>3300</td>
+<td>http://localhost:3300</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s12-3">12.3 Порядок старту і готовність</h3>
+<ol>
+<li>Інфраструктура: Postgres, Redis, Kafka, Mosquitto, MinIO — з healthcheck у compose.</li>
+<li>Keycloak імпортує realm <code>kite</code> з файлу: ролі, клієнти OAuth для kite-web, kite-ops, kite-business, kite-mobile, тестові користувачі кожної ролі.</li>
+<li>Сервіси стартують з <code>depends_on: condition: service_healthy</code>; кожен застосовує свої міграції сам.</li>
+<li>Одноразовий контейнер <code>kafka-init</code> створює топіки (по 6 розділів, фактор реплікації 1).</li>
+<li>Контейнер <code>seed</code> наповнює мережу і тестові дані (12.4).</li>
+</ol>
+<h3 id="s12-4">12.4 Сид-дані</h3>
+<ul>
+<li><strong>Мережа:</strong> Python-скрипт бере список обласних центрів і великих міст, розставляє хаби, сортувальні центри, відділення й Kite Box поблизу центру міст і прив'язує їх до справжніх адрес через локальний Photon (зворотне геокодування).</li>
+<li><strong>Маршрутизація:</strong> правила генеруються з ієрархії «точка → обласний СЦ → магістральний хаб → магістральний хаб → обласний СЦ → точка»; розклад рейсів — двічі на добу між хабами.</li>
+<li><strong>Люди:</strong> тестові клієнти, бізнес-організація з API-ключем і по одному працівнику на кожну роль; паролі — у README.</li>
+<li><strong>Карти:</strong> вирізка України у форматі PMTiles завантажується один раз скриптом <code>make tiles</code> (утиліта pmtiles, обрізка за межами країни); стиль карти — власний JSON у кольорах бренду.</li>
+<li><strong>Геокодер:</strong> готовий дамп Photon для України, якщо доступний, або власна збірка з даних OpenStreetMap; без Photon працює лише вибір точки на карті.</li>
+</ul>
+<h3 id="s12-5">12.5 Команди розробника</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Команда</th>
+<th>Що робить</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>make up / make up-full / make obs</td>
+<td>Підняти профіль core / full / спостережуваність</td>
+</tr>
+<tr>
+<td>make seed</td>
+<td>Перезалити сид-дані</td>
+</tr>
+<tr>
+<td>make tiles</td>
+<td>Завантажити й обрізати тайли України</td>
+</tr>
+<tr>
+<td>make contracts</td>
+<td>Згенерувати клієнтів з OpenAPI і класи подій з JSON Schema</td>
+</tr>
+<tr>
+<td>make test</td>
+<td>Юніт- і інтеграційні тести (Testcontainers)</td>
+</tr>
+<tr>
+<td>make down -v</td>
+<td>Зупинити й видалити дані</td>
+</tr>
+</tbody>
+</table></div>
+<p>CI — GitHub Actions: збірка і тести кожного сервісу за змінами в його папці, перевірка контрактів, збірка Docker-образів.</p>
+</section>
+<section aria-labelledby="s13" class="doc-sec"><h2 id="s13"><span class="h2-num">13</span><span class="h2-text">Роадмап</span></h2>
+<p>MVP готовий після фази 4 — орієнтовно через 17 тижнів роботи однієї людини; v2 — ще близько 8 тижнів. Кожна фаза закінчується воротами: наскрізним сценарієм, який має працювати, перш ніж іти далі.</p>
+<figure class="dia-wrap"><div class="dia-scroll"><svg aria-label="MVP після фази 4, приблизно 17 тижнів; v2 ще приблизно 8 тижнів" class="dia" font-family="var(--f-body)" font-size="11.5" role="img" viewbox="0 0 760 920"><defs><marker id="rm-arrow" markerheight="6" markerwidth="6" orient="auto-start-reverse" refx="9" refy="5" viewbox="0 0 10 10"><path d="M0 0L10 5L0 10z" fill="var(--d-edge)"></path></marker></defs><text fill="var(--d-ink)" font-size="15" font-weight="600" x="24" y="28">MVP — після фази 4 (~17 тижнів), v2 — ще ~8 тижнів</text><text fill="var(--d-quiet)" x="24" y="46">Оцінки для однієї людини; пунктир — v2, тонований блок — паралельний трек</text><g><g><line marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="40" x2="40" y1="128" y2="168"></line><polygon fill="var(--d-edge)" points="40,140 48,148 40,156 32,148"></polygon></g><g><line marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="40" x2="40" y1="240" y2="280"></line><polygon fill="var(--d-edge)" points="40,252 48,260 40,268 32,260"></polygon></g><g><line marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="40" x2="40" y1="352" y2="392"></line><polygon fill="var(--d-edge)" points="40,364 48,372 40,380 32,372"></polygon></g><g><line marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="40" x2="40" y1="464" y2="504"></line><polygon fill="var(--d-edge)" points="40,476 48,484 40,492 32,484"></polygon></g><g><line marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="40" x2="40" y1="576" y2="616"></line><polygon fill="var(--d-accent)" points="40,588 48,596 40,604 32,596"></polygon></g><g><line marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-width="1.25" x1="40" x2="40" y1="688" y2="728"></line><polygon fill="var(--d-edge)" points="40,700 48,708 40,716 32,708"></polygon></g><path d="M736 316H748V860H736" fill="none" marker-end="url(#rm-arrow)" stroke="var(--d-edge)" stroke-dasharray="4 4" stroke-width="1.25"></path></g><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="56"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="80">Фаза 0 · Фундамент · ~2 тижні</text><text fill="var(--d-ink)" x="40" y="100">Монорепо, Docker Compose з інфраструктурою, Keycloak realm, api-gateway, CI</text><text fill="var(--d-ink)" x="40" y="116">Конвеєр контрактів (OpenAPI, JSON Schema), UI-кит і токени, каркас Flutter</text></g><text fill="var(--d-quiet)" x="56" y="152">Ворота: запит із JWT проходить gateway → сервіс → Kafka → сервіс</text><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="168"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="192">Фаза 1 · Ядро відправлення · ~4 тижні</text><text fill="var(--d-ink)" x="40" y="212">network-service і сид-мережа, pricing, створення, підтвердження і скасування накладної</text><text fill="var(--d-ink)" x="40" y="228">Оплата через mock-pay, QR-код, карта точок і майстер створення у вебі та застосунку</text></g><text fill="var(--d-quiet)" x="56" y="264">Ворота: клієнт створив і оплатив накладну, бачить її на дашборді</text><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="280"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="304">Фаза 2 · Мережа і сканування · ~5 тижнів</text><text fill="var(--d-ink)" x="40" y="324">scan-service, realtime і пейринг, Kite Scan у Flutter, робочі місця відділення й хабу</text><text fill="var(--d-ink)" x="40" y="340">Мішки, рейси, маніфести, повна стейт-машина, журнал подій і таймлайн</text></g><text fill="var(--d-quiet)" x="56" y="376">Ворота: посилка пройшла шлях від прийому до видачі лише скануванням</text><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="392"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="416">Фаза 3 · Отримання і керування · ~3 тижні</text><text fill="var(--d-ink)" x="40" y="436">Kite Box (емулятор і екран), видача з кодом, таймери зберігання, повернення</text><text fill="var(--d-ink)" x="40" y="452">Переадресація, інший отримувач, відмова; сповіщення: push, email, SMS</text></g><text fill="var(--d-quiet)" x="56" y="488">Ворота: повний цикл через поштомат, з переадресацією і поверненням</text><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="504"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="528">Фаза 4 · AI і якість · ~3 тижні</text><text fill="var(--d-ink)" x="40" y="548">ai-service: прогноз дати (правило → модель), ризик отримання; претензії; аудит</text><text fill="var(--d-ink)" x="40" y="564">Спостережуваність, навантажувальні тести k6, вимоги розділу 4</text></g><text fill="var(--d-ink)" font-weight="600" x="56" y="600">Реліз MVP: усі вимоги MVP і цілі продуктивності виконано</text><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-dasharray="5 4" stroke-width="1.25" width="712" x="24" y="616"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="640">Фаза 5 · v2: бізнес · ~4 тижні</text><text fill="var(--d-ink)" x="40" y="660">Kite Business: організація, ключі API, вебхуки, імпорт CSV, реєстри</text><text fill="var(--d-ink)" x="40" y="676">Післяплата і виплати, рахунки, легкі повернення, страхування, пакування</text></g><text fill="var(--d-quiet)" x="56" y="712">Ворота: магазин працює через API і отримує виплати післяплати</text><g><rect fill="none" height="72" rx="8" stroke="var(--d-edge)" stroke-dasharray="5 4" stroke-width="1.25" width="712" x="24" y="728"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="752">Фаза 6 · v2: досвід і AI · ~4 тижні</text><text fill="var(--d-ink)" x="40" y="772">Мультиномер, сторонні номери, відпустка, бали, мульти-комірка, камера зберігання</text><text fill="var(--d-ink)" x="40" y="788">Диспетчерська, підтримка; фото → накладна, оцінка пошкоджень, асистент Kit</text></g><g><rect fill="var(--d-tint)" height="72" rx="8" stroke="var(--d-edge)" stroke-width="1.25" width="712" x="24" y="824"></rect><text fill="var(--d-ink)" font-size="13" font-weight="600" x="40" y="848">Паралельний трек · Симулятор</text><text fill="var(--d-ink)" x="40" y="868">Стартує після фази 2: рухає посилки мережею для демо</text><text fill="var(--d-ink)" x="40" y="884">і дає дані для навчання моделей фази 4; обсяг обговоримо окремо</text></g></svg></div><figcaption>роадмап · 7 фаз, ворота між ними, паралельний трек симулятора</figcaption></figure>
+<p>Ворота — це демо-сценарії, а не відсоток готовності: якщо фаза 2 не провела посилку від прийому до видачі лише скануванням, фаза 3 не починається.</p>
+</section>
+<section aria-labelledby="s14" class="doc-sec"><h2 id="s14"><span class="h2-num">14</span><span class="h2-text">Глосарій і відкриті питання</span></h2>
+<h3 id="s14-1">14.1 Глосарій</h3>
+<div class="table-wrap" tabindex="0"><table>
+<thead>
+<tr>
+<th>Термін</th>
+<th>Значення</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Відправлення (накладна)</td>
+<td>Один договір доставки з номером <code>KT…UA</code>; може мати кілька місць</td>
+</tr>
+<tr>
+<td>Місце (parcel)</td>
+<td>Фізична коробка чи конверт зі своїм штрих-кодом</td>
+</tr>
+<tr>
+<td>Kite Box</td>
+<td>Поштомат Kite з комірками S, M, L</td>
+</tr>
+<tr>
+<td>Магістральний хаб</td>
+<td>Великий сортувальний центр, між хабами ходять рейси</td>
+</tr>
+<tr>
+<td>Обласний СЦ</td>
+<td>Сортувальний центр області, з'єднує точки з хабом</td>
+</tr>
+<tr>
+<td>Лінія сортування</td>
+<td>Місце в хабі, куди кладуть посилки одного напрямку</td>
+</tr>
+<tr>
+<td>Транспортна одиниця</td>
+<td>Мішок, контейнер чи палета з посилками; може містити інші одиниці</td>
+</tr>
+<tr>
+<td>Рейс</td>
+<td>Поїздка машини між двома точками мережі</td>
+</tr>
+<tr>
+<td>Маніфест</td>
+<td>Перелік одиниць, які мають бути в рейсі</td>
+</tr>
+<tr>
+<td>Розбіжність</td>
+<td>Нестача, зайве, пошкодження чи неправильне сортування, виявлене при скануванні</td>
+</tr>
+<tr>
+<td>Післяплата (COD)</td>
+<td>Отримувач платить за товар при отриманні, Kite переказує гроші відправнику</td>
+</tr>
+<tr>
+<td>Оголошена вартість</td>
+<td>Сума, на яку застраховано відправлення; ліміт компенсації</td>
+</tr>
+<tr>
+<td>Об'ємна вага</td>
+<td>Д × Ш × В / 4000 — тарифікуємо за більшою з неї та фактичної</td>
+</tr>
+<tr>
+<td>Відпустка</td>
+<td>Утримання посилки до обраної дати без плати за зберігання</td>
+</tr>
+<tr>
+<td>Пейринг</td>
+<td>Прив'язка телефону-сканера до сесії Kite Ops під тим самим акаунтом</td>
+</tr>
+<tr>
+<td>Outbox</td>
+<td>Таблиця подій, які записуються в одній транзакції зі зміною і потім публікуються в Kafka</td>
+</tr>
+<tr>
+<td>Сага</td>
+<td>Послідовність кроків у кількох сервісах з компенсаціями на випадок збою</td>
+</tr>
+<tr>
+<td>Проєкція</td>
+<td>Готове для читання представлення даних, побудоване з подій</td>
+</tr>
+<tr>
+<td>ETA</td>
+<td>Прогнозована дата й вікно доставки</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s14-2">14.2 Відкриті питання</h3>
+<ol>
+<li><strong>Подієва модель</strong> — варіант A, B чи C і решта питань з розділу 8; домовились обговорити окремо.</li>
+<li><strong>A8 «відправка без етикетки»</strong> — у відповідях пропущено; я заклав її в MVP, бо QR-код і так лежить в основі сканування. Підтверди або прибери.</li>
+<li><strong>AI-6 і AI-8</strong> — ти написав «усе, крім 4 і 7»; я поставив асистента Kit у v2, а маршрут кур'єра — у v3, бо застосунок кур'єра (F6) не робимо. Ок?</li>
+<li><strong>Доставка на адресу</strong> — без застосунку кур'єра я залишив мінімальну роль COURIER у Kite Scan (список завдань, «видано / не вдалося»). Залишаємо так чи прибираємо адресну доставку взагалі?</li>
+<li><strong>Розподіл MVP / v2</strong> — я переніс у v2 частину погоджених фіч (мультиномер, сторонні номери, відпустка, зона доступності, мульти-комірка, бали, Kite Business та інше), щоб MVP був реальним для однієї людини. Перевір розділ 3.</li>
+<li><strong>Push на iOS</strong> — погоджуємось, що фонові push на iOS лише через FCM, чи обмежуємось Android + web push?</li>
+<li><strong>LLM для v2</strong> — хмарний API з vision чи локальна модель через Ollama?</li>
+<li><strong>Бренд</strong> — Kite і палітра підходять? Наступним кроком можу оформити дизайн-систему (токени, компоненти, приклади екранів).</li>
+<li><strong>Симулятор</strong> — його обсяг і формат обговорюємо окремо; у роадмапі він паралельний трек після фази 2.</li>
+</ol></section>
+      <footer class="page-foot">Kite — навчальний проєкт. Повний DDL — у файлі schema.sql, контракт API — у openapi.yaml.</footer>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var body = document.body;
+  var btn = document.getElementById('menu-btn');
+  var scrim = document.getElementById('scrim');
+  function setOpen(open) {
+    body.classList.toggle('nav-open', open);
+    btn.setAttribute('aria-expanded', String(open));
+  }
+  btn.addEventListener('click', function () { setOpen(!body.classList.contains('nav-open')); });
+  scrim.addEventListener('click', function () { setOpen(false); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setOpen(false); });
+  document.querySelectorAll('.rail a').forEach(function (a) {
+    a.addEventListener('click', function () { setOpen(false); });
+  });
+
+  // scroll-spy
+  var secs = Array.prototype.slice.call(document.querySelectorAll('.doc-sec h2, .doc-sec h3'));
+  var navSecs = {};
+  document.querySelectorAll('.nav-sec').forEach(function (li) { navSecs[li.dataset.sec] = li; });
+  var subLinks = {};
+  document.querySelectorAll('.nav-subs a').forEach(function (a) { subLinks[a.getAttribute('href').slice(1)] = a; });
+  var activeSec = null, activeSub = null;
+  function update() {
+    var y = window.scrollY + 120, cur = null;
+    for (var i = 0; i < secs.length; i++) {
+      if (secs[i].getBoundingClientRect().top + window.scrollY <= y) cur = secs[i]; else break;
+    }
+    if (!cur) cur = secs[0];
+    var secId = cur.tagName === 'H2' ? cur.id : cur.id.split('-')[0];
+    var subId = cur.tagName === 'H3' ? cur.id : null;
+    if (secId !== activeSec) {
+      if (activeSec && navSecs[activeSec]) navSecs[activeSec].classList.remove('is-active');
+      if (navSecs[secId]) {
+        navSecs[secId].classList.add('is-active');
+        var top = navSecs[secId].querySelector('.nav-top');
+        var rail = document.getElementById('rail');
+        var r = top.getBoundingClientRect(), rr = rail.getBoundingClientRect();
+        if (r.top < rr.top + 40 || r.bottom > rr.bottom - 40) rail.scrollTop += r.top - rr.top - 60;
+      }
+      activeSec = secId;
+    }
+    if (subId !== activeSub) {
+      if (activeSub && subLinks[activeSub]) subLinks[activeSub].classList.remove('is-active');
+      if (subId && subLinks[subId]) subLinks[subId].classList.add('is-active');
+      activeSub = subId;
+    }
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(function () { update(); ticking = false; }); }
+  }, { passive: true });
+  update();
+})();
+</script>
+
+</body></html>
