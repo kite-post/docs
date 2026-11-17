@@ -1,18 +1,20 @@
 # 09 · API-контракт
 
-> **Kite** — документація поштової системи · v1.4 · затверджено · 14.11.2026
+> **Kite** — документація поштової системи · v1.4 · затверджено · 17.11.2026
 
 Зовнішній API — REST/JSON за шлюзом під `/api/v1`, описаний у `openapi.yaml` репозиторію `kite-contracts`; між сервісами — події Kafka у форматі CloudEvents; пристрої — MQTT; живі оновлення — WebSocket. Нижче — правила і повна карта ендпоїнтів; схеми тіл запитів і відповідей — у OpenAPI.
 
+Стан контракту: `kite-contracts` v0.2.0 описує публічну частину й автентифікацію (9.2), клієнтський кабінет (9.3) і з Kite Ops — лише прийом сканів і сортувальну підказку (9.5); разом 41 шлях і 53 операції. Kite Business (9.4) і решта Kite Ops дописуються в контракт разом із відповідними сервісами. Усі 34 типи подій (9.7) уже описані.
+
 ## 9.1 Загальні правила
 
-- **Автентифікація:** `Authorization: Bearer <JWT>` для клієнтів і персоналу; `X-Api-Key` для бізнес-інтеграцій.
-- **Ідемпотентність:** `Idempotency-Key` обов'язковий для створення відправлень, платежів і дій з оплатою; повтор з тим самим ключем повертає ту саму відповідь 24 год.
-- **Помилки:** формат `application/problem+json` (RFC 9457) з полями `type`, `title`, `status`, `detail`, `code` (наприклад `SHIPMENT_INVALID_TRANSITION`) і `errors[]` для валідації.
-- **Пагінація:** курсорна — `?limit=20&cursor=…`, у відповіді `nextCursor`.
+- **Автентифікація:** `Authorization: Bearer <JWT>` для клієнтів і персоналу; `X-Api-Key` для бізнес-інтеграцій (схема оголошена в OpenAPI, до операцій підключається разом із Kite Business).
+- **Ідемпотентність:** `Idempotency-Key` (UUID) обов'язковий для створення, підтвердження й скасування відправлень, дій керування доставкою, платежів, відкриття комірки, бронювання камери зберігання і претензій; повтор з тим самим ключем повертає ту саму відповідь 24 год. Пакет сканів ідемпотентний за `scanId` кожного скану.
+- **Помилки:** формат `application/problem+json` (RFC 9457) з полями `type`, `title`, `status`, `detail`, `instance`, `code` (наприклад `SHIPMENT_INVALID_TRANSITION`), `requestId` і `errors[]` (`field`, `code`, `message`) для валідації.
+- **Пагінація:** курсорна — `?limit=20&cursor=…` (`limit` від 1 до 100, типово 20), у відповіді `nextCursor`.
 - **Мова:** `Accept-Language: uk` або `en` — від неї залежать людські описи статусів.
 - **Трасування:** `X-Request-Id` приймається або генерується шлюзом і проходить через усі сервіси й події.
-- **Конкурентні зміни:** `ETag` / `If-Match` для PATCH відправлень і налаштувань.
+- **Конкурентні зміни:** `ETag` / `If-Match` для PATCH профілю (`/me`) і відправлень; PATCH всюди має семантику злиття (RFC 7396) — поля, яких немає в тілі, лишаються як були. Налаштування сповіщень замінюються цілком через PUT.
 - **Вебхуки бізнесу:** заголовок `Kite-Signature: t=<час>,v1=<HMAC-SHA256(secret, t.body)>`; повтори з експоненційною паузою до 24 год.
 
 ## 9.2 Публічні та автентифікація
@@ -106,19 +108,19 @@
 
 ## 9.7 Події Kafka
 
-Усі події — CloudEvents (`id`, `source`, `type`, `time`, `subject`, `data`), ключ розділу — `shipmentId`, якщо подія стосується відправлення.
+Усі події — CloudEvents 1.0 у JSON. Обов'язкові поля конверта — `specversion`, `id` (UUID), `source`, `type`, `time` і `data`; необов'язкові — `subject`, `datacontenttype`, `dataschema` і власні розширення `kitereceivedat` (час запису), `kiterequestid` (`X-Request-Id`), `kitecausationid` (подія-причина) і `kitepartitionkey`. Тип події — `kite.<домен>.<подія>.v1`; топік, продюсер, споживачі й ключ розділу кожного типу задані в `events/registry.json` репозиторію `kite-contracts`. Для подій відправлення ключ розділу — `shipmentId`.
 
-| Топік            | Типи подій                                                                                             | Продюсер          | Споживачі                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------------ | ----------------- | ---------------------------------------------------------------------- |
-| shipment.events  | created, confirmed, cancelled, status-changed, redirected, recipient-changed, hold-set, return-created | shipment-service  | tracking, notification, payment, locker, business (вебхуки), ai, audit |
-| scan.events      | scan.recorded, unit.scanned, scan.voided                                                               | scan-service      | shipment, logistics, tracking, realtime                                |
-| logistics.events | unit.closed, trip.departed, trip.arrived, discrepancy.opened                                           | logistics-service | shipment, tracking, realtime                                           |
-| locker.events    | cell.reserved, parcel.deposited, parcel.collected, storage.expired                                     | locker-service    | shipment, tracking, notification                                       |
-| payment.events   | payment.succeeded, payment.failed, refund.completed, cod.collected, payout.completed                   | payment-service   | shipment, notification, business                                       |
-| customer.events  | phone.verified, phone.removed, trusted-person.changed                                                  | customer-service  | tracking (індекс «мені»), shipment                                     |
-| ai.events        | eta.predicted, risk.scored                                                                             | ai-service        | tracking, notification, shipment                                       |
-| care.events      | claim.created, claim.resolved, ticket.updated                                                          | care-service      | notification, payment (компенсація)                                    |
-| audit.events     | staff.action, pii.accessed                                                                             | усі сервіси       | audit-service                                                          |
+| Топік            | Типи подій                                                                                                                                                                                                                                                     | Ключ розділу                                          | Продюсер          | Споживачі                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------- | ---------------------------------------------------------------------- |
+| shipment.events  | `kite.shipment.created.v1`, `kite.shipment.confirmed.v1`, `kite.shipment.cancelled.v1`, `kite.shipment.status-changed.v1`, `kite.shipment.redirected.v1`, `kite.shipment.recipient-changed.v1`, `kite.shipment.hold-set.v1`, `kite.shipment.return-created.v1` | `shipmentId`; return-created — `originalShipmentId`   | shipment-service  | tracking, notification, payment, locker, business (вебхуки), ai, audit |
+| scan.events      | `kite.scan.recorded.v1`, `kite.scan.unit-scanned.v1`, `kite.scan.voided.v1`                                                                                                                                                                                    | `shipmentId`; unit-scanned — `unitCode`               | scan-service      | shipment, logistics, tracking, realtime                                |
+| logistics.events | `kite.logistics.unit-closed.v1`, `kite.logistics.trip-departed.v1`, `kite.logistics.trip-arrived.v1`, `kite.logistics.discrepancy-opened.v1`                                                                                                                   | unit-closed — `unitCode`; решта — `tripId`            | logistics-service | shipment, tracking, realtime                                           |
+| locker.events    | `kite.locker.cell-reserved.v1`, `kite.locker.parcel-deposited.v1`, `kite.locker.parcel-collected.v1`, `kite.locker.storage-expired.v1`                                                                                                                         | `shipmentId`                                          | locker-service    | shipment, tracking, notification                                       |
+| payment.events   | `kite.payment.succeeded.v1`, `kite.payment.failed.v1`, `kite.payment.refund-completed.v1`, `kite.payment.cod-collected.v1`, `kite.payment.payout-completed.v1`                                                                                                 | `shipmentId`; payout-completed — `payoutId`           | payment-service   | shipment, notification, business                                       |
+| customer.events  | `kite.customer.phone-verified.v1`, `kite.customer.phone-removed.v1`, `kite.customer.trusted-person-changed.v1`                                                                                                                                                 | `customerId`                                          | customer-service  | tracking (індекс «мені»), shipment                                     |
+| ai.events        | `kite.ai.eta-predicted.v1`, `kite.ai.risk-scored.v1`                                                                                                                                                                                                           | `shipmentId`                                          | ai-service        | tracking, notification, shipment                                       |
+| care.events      | `kite.care.claim-created.v1`, `kite.care.claim-resolved.v1`, `kite.care.ticket-updated.v1`                                                                                                                                                                     | `shipmentId`; ticket-updated — `ticketId`             | care-service      | notification, payment (компенсація)                                    |
+| audit.events     | `kite.audit.staff-action.v1`, `kite.audit.pii-accessed.v1`                                                                                                                                                                                                     | staff-action — `entityId`; pii-accessed — `subjectId` | усі сервіси       | audit-service                                                          |
 
 ---
 
