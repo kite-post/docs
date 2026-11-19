@@ -74,26 +74,26 @@
 
 ## 9.5 Kite Ops (персонал)
 
-| Метод і шлях                                                                   | Призначення                                                | Роль                       |
-| ------------------------------------------------------------------------------ | ---------------------------------------------------------- | -------------------------- |
-| GET /api/v1/ops/shipments/search?q=                                            | Пошук за номером, телефоном, ПІБ                           | Оператор, підтримка        |
-| POST /api/v1/ops/acceptances                                                   | Прийом: штрих-код, фактична вага, габарити, оплата на касі | Оператор                   |
-| GET /api/v1/ops/shipments/{id}/label                                           | Етикетка PDF                                               | Оператор                   |
-| POST /api/v1/ops/handovers                                                     | Видача: код отримувача або довірена особа                  | Оператор                   |
-| POST /api/v1/scans                                                             | Пакет сканів (до 100)                                      | Будь-який сканер персоналу |
-| GET /api/v1/ops/hubs/{hubId}/sort-hint/{barcode}                               | Сортувальна підказка                                       | Сортувальник               |
-| POST /api/v1/ops/units; POST …/{id}/items; POST …/{id}/close; POST …/{id}/open | Мішки й контейнери                                         | Сортувальник, оператор     |
-| POST /api/v1/ops/trips; POST …/{id}/{start-loading\|depart\|arrive}            | Рейси                                                      | Начальник зміни, водій     |
-| GET /api/v1/ops/trips/{id}/manifest; GET …/{id}/reconciliation                 | Маніфест і звірка                                          | Начальник зміни            |
-| GET, PATCH /api/v1/ops/discrepancies                                           | Розбіжності                                                | Начальник зміни            |
-| POST /api/v1/ops/scanner-sessions                                              | Почати пейринг: код і QR для телефону                      | Персонал                   |
-| POST /api/v1/scanner/pair                                                      | Телефон приєднується до сесії                              | Персонал                   |
-| CRUD /api/v1/ops/locations, /routing-rules, /sort-lines, /schedules            | Мережа                                                     | Адмін                      |
-| CRUD /api/v1/ops/tariffs, /promo-codes                                         | Тарифи і промокоди                                         | Адмін                      |
-| CRUD /api/v1/ops/users                                                         | Персонал і ролі (фасад над Keycloak)                       | Адмін                      |
-| GET /api/v1/ops/incidents; GET /api/v1/ops/network/load                        | Диспетчерська                                              | Диспетчер                  |
-| GET, PATCH /api/v1/ops/claims; /api/v1/ops/tickets                             | Претензії і тікети                                         | Підтримка                  |
-| GET /api/v1/ops/audit                                                          | Журнал дій                                                 | Адмін                      |
+| Метод і шлях                                                                   | Призначення                                                        | Роль                       |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------ | -------------------------- |
+| GET /api/v1/ops/shipments/search?q=                                            | Пошук за номером, телефоном, ПІБ                                   | Оператор, підтримка        |
+| POST /api/v1/ops/acceptances                                                   | Прийом: штрих-код, фактична вага, габарити, оплата на касі         | Оператор                   |
+| GET /api/v1/ops/shipments/{id}/label                                           | Етикетка PDF                                                       | Оператор                   |
+| POST /api/v1/ops/handovers                                                     | Видача: код отримувача або довірена особа                          | Оператор                   |
+| POST /api/v1/scans                                                             | Пакет сканів (до 100)                                              | Будь-який сканер персоналу |
+| GET /api/v1/ops/hubs/{hubId}/sort-hint/{barcode}                               | Сортувальна підказка                                               | Сортувальник               |
+| POST /api/v1/ops/units; POST …/{id}/items; POST …/{id}/close; POST …/{id}/open | Мішки й контейнери                                                 | Сортувальник, оператор     |
+| POST /api/v1/ops/trips; POST …/{id}/{start-loading\|depart\|arrive}            | Рейси                                                              | Начальник зміни, водій     |
+| GET /api/v1/ops/trips/{id}/manifest; GET …/{id}/reconciliation                 | Маніфест і звірка                                                  | Начальник зміни            |
+| GET, PATCH /api/v1/ops/discrepancies                                           | Розбіжності                                                        | Начальник зміни            |
+| POST /api/v1/ops/scanner-sessions                                              | Почати пейринг: код і QR для телефону                              | Персонал                   |
+| POST /api/v1/scanner/pair                                                      | Телефон приєднується до сесії                                      | Персонал                   |
+| CRUD /api/v1/ops/locations, /routing-rules, /sort-lines, /schedules            | Мережа                                                             | Адмін                      |
+| CRUD /api/v1/ops/tariffs, /promo-codes                                         | Тарифи і промокоди                                                 | Адмін                      |
+| CRUD /api/v1/ops/users                                                         | Персонал, ролі й прив'язка до точки (фасад над Keycloak і network) | Адмін                      |
+| GET /api/v1/ops/incidents; GET /api/v1/ops/network/load                        | Диспетчерська                                                      | Диспетчер                  |
+| GET, PATCH /api/v1/ops/claims; /api/v1/ops/tickets                             | Претензії і тікети                                                 | Підтримка                  |
+| GET /api/v1/ops/audit                                                          | Журнал дій                                                         | Адмін                      |
 
 ## 9.6 Реальний час і пристрої
 

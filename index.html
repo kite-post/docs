@@ -624,7 +624,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <p>Посилка до 5 кг по Україні за 120 грн. Собівартість у моделі: прийом 12 грн, сортування у двох хабах 16 грн, магістраль 28 грн, видача 10 грн, еквайринг 2 грн, накладні витрати 22 грн — разом 90 грн. Валова маржа — 30 грн, або 25%. Додаткові послуги (COD, страхування, зберігання) майже не додають собівартості, тому підвищують маржу.</p>
 </section>
 <section aria-labelledby="s3" class="doc-sec"><h2 id="s3"><span class="h2-num">03</span><span class="h2-text">Технічне завдання: ролі та функціональні вимоги</span></h2>
-<p>Система має 11 ролей з доступом за принципом «роль + скоуп локації»: оператор бачить лише своє відділення, сортувальник — свій хаб. Кожна вимога має ID (FR-…), посилання на фічу з погодженого списку і етап: MVP або v2.</p>
+<p>Система має 10 ролей людей і службову роль <code>SYSTEM</code> з доступом за принципом «роль + скоуп локації»: оператор бачить лише своє відділення, сортувальник — свій хаб. Кожна вимога має ID (FR-…), посилання на фічу з погодженого списку і етап: MVP або v2.</p>
 <h3 id="s3-1">3.1 Ролі</h3>
 <div class="table-wrap" tabindex="0"><table>
 <thead>
@@ -698,7 +698,8 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 </tbody>
 </table></div>
-<p>Окремо існують сервісні акаунти: пристрої Kite Box, стаціонарні сканери-заглушки, симулятор. У подіях їхні дії позначаються роллю <code>SYSTEM</code>; ролі персоналу в подіях — це перелік <code>ActorRole</code> із <code>kite-contracts</code>, і імена ролей у Keycloak збігаються з ним.</p>
+<p>Окремо існують сервісні акаунти: пристрої Kite Box, стаціонарні сканери-заглушки, симулятор. У подіях їхні дії позначаються роллю <code>SYSTEM</code>; ролі персоналу в подіях — це перелік <code>ActorRole</code> із <code>kite-contracts</code>, і імена ролей у Keycloak збігаються з ним. Сервісні акаунти — confidential-клієнти Keycloak із <code>client_credentials</code> і роллю <code>SYSTEM</code>.</p>
+<p>Скоуп локації в токен не потрапляє. Прив'язку працівника до відділення чи хабу тримає network-service у таблиці <code>staff_assignment</code> (6.2): з JWT сервіс бере лише користувача і роль, а локації запитує в network (з коротким кешем у Redis). Тому переведення працівника на іншу точку діє без повторного входу. Прив'язку мають OPERATOR, SORTER і SHIFT_MANAGER; DRIVER обмежений своїми рейсами (<code>trip</code>), DISPATCHER, SUPPORT і ADMIN працюють без локації.</p>
 <h3 id="s3-2">3.2 Матриця доступів (скорочено)</h3>
 <div class="table-wrap" tabindex="0"><table>
 <thead>
@@ -796,7 +797,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 </tbody>
 </table></div>
-<p>Повну матрицю тримаємо в коді як перелік дозволів (permissions) на кшталт <code>shipment:read:own</code>, <code>scan:hub</code>, <code>tariff:write</code>; ролі — набори дозволів у Keycloak.</p>
+<p>Повну матрицю тримаємо в коді як перелік дозволів (permissions) на кшталт <code>shipment:read:own</code>, <code>scan:hub</code>, <code>tariff:write</code>. Keycloak видає лише роль, а мапа «роль → дозволи» живе в <code>kite-contracts</code>: правка матриці не чіпає realm і не роздуває токен.</p>
 <h3 id="s3-3">3.3 Акаунт і профіль</h3>
 <ul>
 <li><strong class="req">FR-101</strong> Реєстрація і вхід за номером телефону з одноразовим кодом (SMS через емулятор); email необов'язковий. MVP.</li>
@@ -1420,6 +1421,11 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <td>network</td>
 <td>linehaul_schedule</td>
 <td>Розклад магістральних рейсів: звідки, куди, час відправлення, дні, тривалість</td>
+</tr>
+<tr>
+<td>network</td>
+<td>staff_assignment</td>
+<td>Прив'язка персоналу до точки: keycloak_user_id, location_id, роль, valid_from, valid_to; одна активна прив'язка на працівника</td>
 </tr>
 <tr>
 <td>logistics</td>
@@ -2365,7 +2371,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 </tr>
 <tr>
 <td>CRUD /api/v1/ops/users</td>
-<td>Персонал і ролі (фасад над Keycloak)</td>
+<td>Персонал, ролі й прив'язка до точки (фасад над Keycloak і network)</td>
 <td>Адмін</td>
 </tr>
 <tr>
@@ -2790,7 +2796,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <h3 id="s12-3">12.3 Порядок старту і готовність</h3>
 <ol>
 <li>Інфраструктура: Postgres, Redis, Kafka, Mosquitto, MinIO — з healthcheck у compose.</li>
-<li>Keycloak імпортує realm <code>kite</code> з файлу: ролі, клієнти OAuth для kite-web, kite-ops, kite-business, kite-mobile, тестові користувачі кожної ролі.</li>
+<li>Keycloak імпортує realm <code>kite</code> з файлу (<code>--import-realm</code>): ролі за переліком <code>ActorRole</code>; публічні клієнти з PKCE для kite-web, kite-ops, kite-business і kite-mobile; audience <code>kite-api</code>, яку перевіряє gateway; сервісні акаунти з роллю <code>SYSTEM</code>; клієнт <code>kite-dev-cli</code> з password grant — лише для стенду; тестові користувачі кожної ролі з фіксованими id. Персонал входить із TOTP, тестовим працівникам імпортуються TOTP-ключі, записані в README. Access-токен живе 5 хв, далі refresh (NFR-07). Імпорт спрацьовує лише на порожній базі, тож зміни у файлі застосовуються після <code>make down -v</code>.</li>
 <li>Сервіси стартують з <code>depends_on: condition: service_healthy</code>; кожен застосовує свої міграції сам.</li>
 <li>Одноразовий контейнер <code>kafka-init</code> створює топіки (по 6 розділів, фактор реплікації 1).</li>
 <li>Контейнер <code>seed</code> наповнює мережу і тестові дані (12.4).</li>
@@ -2799,7 +2805,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <ul>
 <li><strong>Мережа:</strong> Python-скрипт бере список обласних центрів і великих міст, розставляє хаби, сортувальні центри, відділення й Kite Box поблизу центру міст і прив'язує їх до справжніх адрес через локальний Photon (зворотне геокодування).</li>
 <li><strong>Маршрутизація:</strong> правила генеруються з ієрархії «точка → обласний СЦ → магістральний хаб → магістральний хаб → обласний СЦ → точка»; розклад рейсів — двічі на добу між хабами.</li>
-<li><strong>Люди:</strong> тестові клієнти, бізнес-організація з API-ключем і по одному працівнику на кожну роль; паролі — у README.</li>
+<li><strong>Люди:</strong> тестові користувачі — по одному на кожну роль плюс кілька клієнтів — живуть у realm-файлі з фіксованими id (12.3). Сид створює для них профілі (<code>customer.keycloak_user_id</code>), бізнес-організацію з API-ключем і прив'язки персоналу до відділень і хабів (<code>staff_assignment</code>). Логіни, паролі й TOTP-ключі — у README. Клієнт поки входить за паролем; вхід за кодом із SMS (FR-101) — окрема задача.</li>
 <li><strong>Карти:</strong> вирізка України у форматі PMTiles завантажується один раз скриптом <code>make tiles</code> (утиліта pmtiles, обрізка за межами країни); стиль карти — власний JSON у кольорах бренду.</li>
 <li><strong>Геокодер:</strong> готовий дамп Photon для України, якщо доступний, або власна збірка з даних OpenStreetMap; без Photon працює лише вибір точки на карті.</li>
 </ul>
@@ -2819,6 +2825,10 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <tr>
 <td>make seed</td>
 <td>Перезалити сид-дані</td>
+</tr>
+<tr>
+<td>make token ROLE=…</td>
+<td>Отримати JWT тестового користувача ролі через <code>kite-dev-cli</code>; для персоналу TOTP-код рахується з ключа в README</td>
 </tr>
 <tr>
 <td>make tiles</td>
@@ -2971,6 +2981,7 @@ figcaption { font-size: 13px; color: var(--faint); margin-top: 8px; font-family:
 <li><strong>LLM для v2</strong> — локальна відкрита модель через Ollama, щоб vision-конвеєр працював без інтернету й без облікових записів.</li>
 <li><strong>Бренд</strong> — Kite, палітра і знак підтверджені. Наступний крок — дизайн-система: токени, компоненти, приклади екранів.</li>
 <li><strong>Симулятор</strong> — лишається паралельним треком після фази 2; обсяг і формат доробимо пізніше, на роадмап це не впливає.</li>
+<li><strong>Автентифікація</strong> — один realm <code>kite</code> імпортується з файлу в <code>kite-infra</code>. У токені лише користувач і роль: дозволи виводяться з ролі в <code>kite-contracts</code>, скоуп локації береться з <code>network.staff_assignment</code>. Персонал — обов'язково TOTP. Вхід клієнта за кодом із SMS потребує власного автентифікатора Keycloak і робиться окремою задачею; до того клієнт входить за паролем.</li>
 <li><strong>Кодогенерація з контрактів</strong> — централізована: генерує і публікує <code>kite-contracts</code>, сервіс лише закріплює тег. Мови — Java, Go, Dart, TypeScript (Vue-застосунки) і Python (ai-service, симулятор). Версія одна на всі пакети й усі репозиторії і піднімається всюди одразу — через PR, які відкриває розсилка після релізу. Мажорна версія не змінюється: зміни лише адитивні, а несумісна зміна — це новий тип події.</li>
 </ol></section>
       <footer class="page-foot">Kite — навчальний проєкт. Код — в організації на GitHub, репозиторій на сервіс; контракт API — у kite-contracts, стенд — у kite-infra.</footer>
